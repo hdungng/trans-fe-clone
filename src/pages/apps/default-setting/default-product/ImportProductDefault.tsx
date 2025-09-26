@@ -7,16 +7,23 @@ import { defaultProductFormFieldsControlImport } from 'types/extract-form-field/
 import { Field, useFormikContext } from 'formik';
 import { Checkbox } from '@mui/material';
 import ContextMenu from 'pages/apps/job-number/form/dynamic-fields/ContextMenu';
+import { useIntl } from 'react-intl';
 
 
 const ImportProductDefault: React.FC = () => {
     const { setFieldValue } = useFormikContext();
+    const intl = useIntl();
 
     return (
         <Box>
             <Grid container spacing={3}>
                 <Grid>
-                    <Typography variant="h5">Cập nhật thông số mặc định sản phẩm</Typography>
+                    <Typography variant="h5">
+                        {intl.formatMessage({
+                            id: 'default-setting.product.update-default-parameters',
+                            defaultMessage: 'Update default product parameters'
+                        })}
+                    </Typography>
                 </Grid>
 
 
@@ -29,7 +36,10 @@ const ImportProductDefault: React.FC = () => {
                             import
                         </Box>
                         <Box component="span" sx={{ display: 'none' }}>
-                            Tùy chọn nhập mã hàng
+                            {intl.formatMessage({
+                                id: 'default-setting.product.item-code-option-label',
+                                defaultMessage: 'Item code entry option'
+                            })}
                         </Box>
                         <Stack sx={{ gap: 1 }}>
                             <FormGroup>
@@ -43,7 +53,10 @@ const ImportProductDefault: React.FC = () => {
                                                     onChange={() => setFieldValue('item_code_option', !field.value)}
                                                 />
                                             }
-                                            label="Tùy chọn nhập mã hàng"
+                                            label={intl.formatMessage({
+                                                id: 'default-setting.product.item-code-option-label',
+                                                defaultMessage: 'Item code entry option'
+                                            })}
                                         />
                                     )}
                                 </Field>
@@ -66,7 +79,12 @@ const ImportProductDefault: React.FC = () => {
                 />
 
                 <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}>
-                    <Typography variant="h5">Số lượng & Đơn giá</Typography>
+                    <Typography variant="h5">
+                        {intl.formatMessage({
+                            id: 'default-setting.product.import.quantity-price-section',
+                            defaultMessage: 'Quantity & unit price'
+                        })}
+                    </Typography>
                 </Grid>
 
                 <DynamicField
@@ -76,7 +94,12 @@ const ImportProductDefault: React.FC = () => {
                 />
 
                 <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}>
-                    <Typography variant="h5">Thuế nhập khẩu</Typography>
+                    <Typography variant="h5">
+                        {intl.formatMessage({
+                            id: 'default-setting.product.import.import-tax-section',
+                            defaultMessage: 'Import taxes'
+                        })}
+                    </Typography>
                 </Grid>
 
                 <DynamicField
@@ -86,7 +109,12 @@ const ImportProductDefault: React.FC = () => {
                 />
 
                 <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}>
-                    <Typography variant="h5">Thuế khác và miễn giảm</Typography>
+                    <Typography variant="h5">
+                        {intl.formatMessage({
+                            id: 'default-setting.product.import.other-tax-section',
+                            defaultMessage: 'Other taxes & exemptions'
+                        })}
+                    </Typography>
                 </Grid>
 
                 <DynamicField
@@ -122,7 +150,12 @@ const ImportProductDefault: React.FC = () => {
                 />
                 <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}></Grid>
                 <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}>
-                    <Typography variant="h5">Thuế tuyệt đối & hạn ngạch</Typography>
+                    <Typography variant="h5">
+                        {intl.formatMessage({
+                            id: 'default-setting.product.import.absolute-tax-section',
+                            defaultMessage: 'Absolute tax & quota'
+                        })}
+                    </Typography>
                 </Grid>
 
                 <DynamicField
@@ -132,7 +165,12 @@ const ImportProductDefault: React.FC = () => {
                 />
 
                 <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}>
-                    <Typography variant="h5">Điều chỉnh & tạm nhập tái xuất</Typography>
+                    <Typography variant="h5">
+                        {intl.formatMessage({
+                            id: 'default-setting.product.import.adjustment-section',
+                            defaultMessage: 'Adjustments & temporary import/export'
+                        })}
+                    </Typography>
                 </Grid>
 
                 <DynamicField

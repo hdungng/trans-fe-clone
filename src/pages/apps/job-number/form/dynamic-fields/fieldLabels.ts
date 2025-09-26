@@ -577,6 +577,10 @@ const directFieldMessages: Record<string, MessageConfig> = {
         id: 'job-number.extract.import.form.product.taxable-value-currency-code',
         defaultMessage: 'Taxable value currency code',
     },
+    export_import_ratio: {
+        id: 'job-number.extract.export.form.product.export-import-ratio',
+        defaultMessage: 'Export/import ratio (%)',
+    },
     export_import_tax_amount: {
         id: 'job-number.extract.export.form.product.export-import-tax-amount',
         defaultMessage: 'Export/import tax amount',
@@ -873,6 +877,14 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
+        regex: /^product_info\.legal_document_code_(\d+)$/,
+        getMessage: (match) => ({
+            id: 'job-number.extract.export.form.product.legal-document-code',
+            defaultMessage: 'Legal document code ({index})',
+            values: { index: Number(match[1]) },
+        }),
+    },
+    {
         regex: /^container_info\.loading_location_code_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.export.form.container.loading-location-code',
@@ -889,7 +901,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^special_consumption_tax_code_(\d+)$/,
+        regex: /^(?:product_info\.)?special_consumption_tax_code_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.special-consumption-tax-code',
             defaultMessage: 'Special consumption tax schedule code ({index})',
@@ -897,7 +909,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^special_consumption_tax_exemption_reduction_code_(\d+)$/,
+        regex: /^(?:product_info\.)?special_consumption_tax_exemption_reduction_code_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.special-consumption-tax-exemption-code',
             defaultMessage: 'Special consumption tax exemption/reduction code ({index})',
@@ -905,7 +917,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^special_consumption_tax_reduction_amount_(\d+)$/,
+        regex: /^(?:product_info\.)?special_consumption_tax_reduction_amount_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.special-consumption-tax-reduction-amount',
             defaultMessage: 'Special consumption tax reduction amount ({index})',
@@ -913,7 +925,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^environmental_tax_code_(\d+)$/,
+        regex: /^(?:product_info\.)?environmental_tax_code_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.environmental-tax-code',
             defaultMessage: 'Environmental tax schedule code ({index})',
@@ -921,7 +933,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^environmental_tax_exemption_reduction_code_(\d+)$/,
+        regex: /^(?:product_info\.)?environmental_tax_exemption_reduction_code_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.environmental-tax-exemption-code',
             defaultMessage: 'Environmental tax exemption/reduction code ({index})',
@@ -929,7 +941,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^environmental_tax_reduction_amount_(\d+)$/,
+        regex: /^(?:product_info\.)?environmental_tax_reduction_amount_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.environmental-tax-reduction-amount',
             defaultMessage: 'Environmental tax reduction amount ({index})',
@@ -937,7 +949,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^vat_tax_code_(\d+)$/,
+        regex: /^(?:product_info\.)?vat_tax_code_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.vat-tax-code',
             defaultMessage: 'VAT schedule code ({index})',
@@ -945,7 +957,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^vat_tax_exemption_reduction_code_(\d+)$/,
+        regex: /^(?:product_info\.)?vat_tax_exemption_reduction_code_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.vat-tax-exemption-code',
             defaultMessage: 'VAT exemption/reduction code ({index})',
@@ -953,7 +965,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^vat_tax_reduction_amount_(\d+)$/,
+        regex: /^(?:product_info\.)?vat_tax_reduction_amount_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.vat-tax-reduction-amount',
             defaultMessage: 'VAT reduction amount ({index})',
@@ -961,7 +973,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^tax_rate_code_(\d+)$/,
+        regex: /^(?:product_info\.)?tax_rate_code_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.tax-rate-code',
             defaultMessage: 'Tax rate/matrix code ({index})',
@@ -969,7 +981,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^tax_exemption_reduction_code_(\d+)$/,
+        regex: /^(?:product_info\.)?tax_exemption_reduction_code_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.tax-exemption-code',
             defaultMessage: 'Tax exemption/reduction code ({index})',
@@ -977,7 +989,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^tax_reduction_amount_(\d+)$/,
+        regex: /^(?:product_info\.)?tax_reduction_amount_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.tax-reduction-amount',
             defaultMessage: 'Tax reduction amount ({index})',
@@ -985,7 +997,7 @@ const patternFieldMessages: { regex: RegExp; getMessage: (match: RegExpMatchArra
         }),
     },
     {
-        regex: /^adjustment_item_sequence_(\d+)$/,
+        regex: /^(?:product_info\.)?adjustment_item_sequence_(\d+)$/,
         getMessage: (match) => ({
             id: 'job-number.extract.import.form.product.adjustment-item-sequence',
             defaultMessage: 'Adjustment item sequence ({index})',
@@ -999,13 +1011,17 @@ export const formatFieldLabel = (field: FieldLike, intl: IntlShape): string => {
         return field.label;
     }
 
-    const direct = directFieldMessages[field.key];
+    const normalizedKey = field.key.startsWith('product_info.')
+        ? field.key.replace('product_info.', '')
+        : field.key;
+
+    const direct = directFieldMessages[normalizedKey];
     if (direct) {
         return intl.formatMessage({ id: direct.id, defaultMessage: direct.defaultMessage }, direct.values);
     }
 
     for (const pattern of patternFieldMessages) {
-        const match = field.key.match(pattern.regex);
+        const match = normalizedKey.match(pattern.regex);
         if (match) {
             const descriptor = pattern.getMessage(match);
             return intl.formatMessage({ id: descriptor.id, defaultMessage: descriptor.defaultMessage }, descriptor.values);

@@ -12,6 +12,7 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { getClientGuidingAI, updateClientGuidingAI } from 'api/client';
 import { useDefaultSetting } from 'pages/apps/default-setting/MainPage';
+import { useIntl } from 'react-intl';
 
 type Props = {
     label: string;
@@ -19,15 +20,39 @@ type Props = {
     method: string;
 };
 
-const validationSchema = Yup.object({
-    guide_text: Yup.string().trim().required('Vui lòng nhập hướng dẫn'),
-    customs_procedure_type: Yup.number().required('Thiếu trường loại hình kinh doanh'),
-    field: Yup.string().trim().required('Thiếu trường field'),
-});
-
 export default function GuideAIForm({ label, fieldKey, method }: Props) {
 
     const { client, customsProcedureType } = useDefaultSetting();
+    const intl = useIntl();
+
+    const validationSchema = React.useMemo(
+        () =>
+            Yup.object({
+                guide_text: Yup.string()
+                    .trim()
+                    .required(
+                        intl.formatMessage({
+                            id: 'guide-ai.validation.guide-text.required',
+                            defaultMessage: 'Please enter the guidance'
+                        })
+                    ),
+                customs_procedure_type: Yup.number().required(
+                    intl.formatMessage({
+                        id: 'guide-ai.validation.customs-procedure.required',
+                        defaultMessage: 'Customs procedure type is required'
+                    })
+                ),
+                field: Yup.string()
+                    .trim()
+                    .required(
+                        intl.formatMessage({
+                            id: 'guide-ai.validation.field.required',
+                            defaultMessage: 'Field key is required'
+                        })
+                    )
+            }),
+        [intl]
+    );
 
     const [response, setResponse] = React.useState<any>();
 
@@ -54,7 +79,15 @@ export default function GuideAIForm({ label, fieldKey, method }: Props) {
 
                 }
             } catch (e: any) {
-                if (isMounted) setFetchError(e.response?.data?.message || e.message || 'Không thể tải dữ liệu');
+                if (isMounted)
+                    setFetchError(
+                        e.response?.data?.message ||
+                            e.message ||
+                            intl.formatMessage({
+                                id: 'guide-ai.error.unable-to-load',
+                                defaultMessage: 'Unable to load data'
+                            })
+                    );
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -64,13 +97,15 @@ export default function GuideAIForm({ label, fieldKey, method }: Props) {
         return () => {
             isMounted = false;
         };
-    }, [client.id, fieldKey, method]);
+    }, [client.id, fieldKey, intl, method]);
 
     if (loading) {
         return (
             <Box sx={{ padding: 3, textAlign: 'center' }}>
                 <CircularProgress />
-                <Typography sx={{ mt: 1 }}>Đang tải dữ liệu...</Typography>
+                <Typography sx={{ mt: 1 }}>
+                    {intl.formatMessage({ id: 'guide-ai.loading', defaultMessage: 'Loading data...' })}
+                </Typography>
             </Box>
         );
     }
@@ -118,10 +153,21 @@ export default function GuideAIForm({ label, fieldKey, method }: Props) {
                     }}
                 >
                     <Typography variant="h4" sx={{ opacity: 0.9, mt: 2, mb: 3 }}>
-                        Cập nhật hướng dẫn trích xuất thông tin AI
+                        {intl.formatMessage({
+                            id: 'guide-ai.form.title',
+                            defaultMessage: 'Update AI extraction guidelines'
+                        })}
                     </Typography>
 
-                    <InputLabel required>Hướng dẫn trích xuất trường {label}</InputLabel>
+                    <InputLabel required>
+                        {intl.formatMessage(
+                            {
+                                id: 'guide-ai.form.field-label',
+                                defaultMessage: 'Extraction guidance for {label}'
+                            },
+                            { label }
+                        )}
+                    </InputLabel>
 
                     <TextField
                         id="guide-ai"
@@ -141,7 +187,14 @@ export default function GuideAIForm({ label, fieldKey, method }: Props) {
 
                     <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
                         <Button type="submit" variant="contained" disabled={isSubmitting}>
-                            {isSubmitting ? <CircularProgress size={20} /> : 'Lưu hướng dẫn'}
+                            {isSubmitting ? (
+                                <CircularProgress size={20} />
+                            ) : (
+                                intl.formatMessage({
+                                    id: 'guide-ai.form.save',
+                                    defaultMessage: 'Save guidelines'
+                                })
+                            )}
                         </Button>
                     </Box>
                 </Box>
