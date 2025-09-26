@@ -1,0 +1,151 @@
+import * as React from 'react';
+import {
+    Box,
+    Typography,
+    TextField,
+    Button,
+    Alert,
+    CircularProgress,
+    InputLabel,
+} from '@mui/material';
+import { Formik } from 'formik';
+import * as Yup from 'yup';
+import { getClientGuidingAI, updateClientGuidingAI } from 'api/client';
+import { useDefaultSetting } from 'pages/apps/default-setting/MainPage';
+
+type Props = {
+    label: string;
+    fieldKey: string;
+    method: string;
+};
+
+const validationSchema = Yup.object({
+    guide_text: Yup.string().trim().required('Vui lòng nhập hướng dẫn'),
+    customs_procedure_type: Yup.number().required('Thiếu trường loại hình kinh doanh'),
+    field: Yup.string().trim().required('Thiếu trường field'),
+});
+
+export default function GuideAIForm({ label, fieldKey, method }: Props) {
+
+    const { client, customsProcedureType } = useDefaultSetting();
+
+    const [response, setResponse] = React.useState<any>();
+
+    const [initialGuide, setInitialGuide] = React.useState('');
+    const [loading, setLoading] = React.useState(true);
+    const [fetchError, setFetchError] = React.useState<string | null>(null);
+
+    // Gọi API GET khi mount để lấy dữ liệu ban đầu
+    React.useEffect(() => {
+        let isMounted = true;
+
+        async function fetchGuide() {
+            try {
+                setLoading(true);
+                setFetchError(null);
+
+                if (client.id) {
+
+                    const res = await getClientGuidingAI(client.id, fieldKey, method, customsProcedureType);
+
+                    if (isMounted || res.status === "success") {
+                        setInitialGuide(res.data?.guide_text ?? '');
+                    }
+
+                }
+            } catch (e: any) {
+                if (isMounted) setFetchError(e.response?.data?.message || e.message || 'Không thể tải dữ liệu');
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        }
+
+        fetchGuide();
+        return () => {
+            isMounted = false;
+        };
+    }, [client.id, fieldKey, method]);
+
+    if (loading) {
+        return (
+            <Box sx={{ padding: 3, textAlign: 'center' }}>
+                <CircularProgress />
+                <Typography sx={{ mt: 1 }}>Đang tải dữ liệu...</Typography>
+            </Box>
+        );
+    }
+
+    if (fetchError) {
+        return (
+            <Box sx={{ padding: 3 }}>
+                <Alert severity="error">{fetchError}</Alert>
+            </Box>
+        );
+    }
+
+    return (
+        <Formik
+            initialValues={{ guide_text: initialGuide, customs_procedure_type: customsProcedureType, field: fieldKey }}
+            enableReinitialize
+            validationSchema={validationSchema}
+            onSubmit={async (values, { setSubmitting, setStatus, resetForm }) => {
+                try {
+                    if (client.id) {
+                        const res = await updateClientGuidingAI(client.id, values, method);
+                        if (res.status === "success") {
+                            setResponse(res)
+                        }
+                        setInitialGuide(values.guide_text);
+                        resetForm({ values });
+                    }
+                } finally {
+                    setSubmitting(false);
+                }
+            }}
+        >
+            {({ handleSubmit, getFieldProps, touched, errors, isSubmitting, status }) => (
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    sx={{
+                        padding: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 1.5,
+                        justifyContent: 'center',
+                        alignItems: 'flex-start',
+                        width: '100%',
+                    }}
+                >
+                    <Typography variant="h4" sx={{ opacity: 0.9, mt: 2, mb: 3 }}>
+                        Cập nhật hướng dẫn trích xuất thông tin AI
+                    </Typography>
+
+                    <InputLabel required>Hướng dẫn trích xuất trường {label}</InputLabel>
+
+                    <TextField
+                        id="guide-ai"
+                        fullWidth
+                        multiline
+                        rows={5}
+                        {...getFieldProps('guide_text')}
+                        error={touched.guide_text && Boolean(errors.guide_text)}
+                        helperText={touched.guide_text && errors.guide_text}
+                    />
+
+                    {response && (
+                        <Alert severity={response.status === "success" ? 'success' : 'error'} sx={{ width: '100%' }}>
+                            {response.message}
+                        </Alert>
+                    )}
+
+                    <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                        <Button type="submit" variant="contained" disabled={isSubmitting}>
+                            {isSubmitting ? <CircularProgress size={20} /> : 'Lưu hướng dẫn'}
+                        </Button>
+                    </Box>
+                </Box>
+            )}
+        </Formik>
+    );
+}
