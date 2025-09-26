@@ -10,7 +10,7 @@ import {
 import { FastField, FieldProps } from 'formik';
 import { DatePicker } from '@mui/x-date-pickers';
 import { useIntl } from 'react-intl';
-import { formatImportFieldLabel } from './importFieldLabels';
+import { formatFieldLabel } from './fieldLabels';
 
 /** ------------ Kiểu dữ liệu ------------ */
 export interface OptionField {
@@ -60,7 +60,7 @@ const ProductFormFields: React.FC<ProductFormFieldsProps> = ({
         <Grid container spacing={2}>
             {fields.map((field) => {
                 const fieldName = `${arrayName}[${index}].${field.key}`;
-                const label = formatImportFieldLabel(
+                const label = formatFieldLabel(
                     { ...field, method: field.method ?? 'import' },
                     intl,
                 );
