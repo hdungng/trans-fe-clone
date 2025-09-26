@@ -21,6 +21,7 @@ import { getClientDetail } from 'api/client';
 import { ClientType } from 'types/pages/client';
 import { useIntl } from 'react-intl';
 
+
 const STATUS_ORDER = ['new', 'ready', 'crosschecked', 'completed'] as const;
 type KnownStatusKey = typeof STATUS_ORDER[number];
 type StatusKey = KnownStatusKey | 'unknown';
@@ -221,6 +222,9 @@ export default function JobNumberPieChart() {
               <MenuItem value="all">
                 {intl.formatMessage({ id: 'job-number.status.tabs.all', defaultMessage: 'All' })}
               </MenuItem>
+              label="Select User"
+            >
+              <MenuItem value="all">All</MenuItem>
               {(userList ?? []).map((user: UserType) => (
                 <MenuItem key={user.id} value={user.id}>
                   {user.full_name}

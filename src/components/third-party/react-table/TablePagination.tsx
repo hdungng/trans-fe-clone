@@ -97,6 +97,7 @@ export default function TablePagination({ getPageCount, setPageIndex, setPageSiz
               setPageIndex(page);
             }}
             inputProps={{ 'aria-label': intl.formatMessage({ id: 'table.pagination.go-to-page', defaultMessage: 'Go to page' }) }}
+
             sx={{ '& .MuiOutlinedInput-input': { py: 0.75, px: 1.25, width: 36 } }}
           />
         </Stack>
