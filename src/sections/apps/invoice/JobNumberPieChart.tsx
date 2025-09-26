@@ -9,7 +9,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import MainCard from 'components/MainCard';
 import Dot from 'components/@extended/Dot';
 import { FormControl, MenuItem, Select, Stack } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { APIResponse } from 'types/response';
 import { getCurrentJobNumberByStatus } from 'api/dashboard';
 import { InputLabel } from '@mui/material';
@@ -19,10 +19,16 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import TaxCodeAutocomplete from 'components/common/TaxCodeAutocomplete';
 import { getClientDetail } from 'api/client';
 import { ClientType } from 'types/pages/client';
+
+const STATUS_ORDER = ['new', 'ready', 'crosschecked', 'completed'] as const;
+type KnownStatusKey = typeof STATUS_ORDER[number];
+type StatusKey = KnownStatusKey | 'unknown';
+type NormalizedDatum = { key: StatusKey; value: number; label: string; color: string };
 // ==============================|| INVOICE - PIE CHART ||============================== //
 
 export default function JobNumberPieChart() {
   const theme = useTheme();
+  const statusOrder = STATUS_ORDER;
   const [totalJobNumber, setTotalJobNumber] = useState<any>(null);
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [userList, setUserList] = useState<UserType[]>();
@@ -79,31 +85,89 @@ export default function JobNumberPieChart() {
     setSelectedUser(event.target.value);
   }
 
-  const chartData = (Array.isArray(totalJobNumber) ? totalJobNumber : []).map((item: any) => {
-    let color;
-    switch (item.label) {
-      case 'Mới':
-        color = theme.palette.warning.main;
-        break;
-      case 'Sẵn sàng':
-        color = theme.palette.primary.main;
-        break;
-      case 'Đã kiểm tra chéo':
-        color = theme.palette.error.main;
-        break;
-      case 'Đã trích xuất':
-        color = theme.palette.success.main;
-        break;
+  const statusConfig: Record<StatusKey, { label: string; color: string }> = useMemo(
+    () => ({
+      new: { label: 'New', color: theme.palette.warning.main },
+      ready: { label: 'Ready', color: theme.palette.primary.main },
+      crosschecked: { label: 'Cross-checked', color: theme.palette.error.main },
+      completed: { label: 'Extracted', color: theme.palette.success.main },
+      unknown: { label: 'Unknown', color: theme.palette.grey[500] }
+    }),
+    [theme.palette.error.main, theme.palette.grey[500], theme.palette.primary.main, theme.palette.success.main, theme.palette.warning.main]
+  );
+
+  const normalizeStatusKey = (value?: string): KnownStatusKey | '' => {
+    if (!value) return '';
+
+    const sanitized = value
+      .toString()
+      .trim()
+      .normalize('NFD')
+      .replace(/[^\p{L}]/gu, '')
+      .toLowerCase();
+
+    switch (sanitized) {
+      case 'moi':
+      case 'new':
+        return 'new';
+      case 'sansang':
+      case 'ready':
+        return 'ready';
+      case 'dakiemtracheo':
+      case 'dackiemtracheo':
+      case 'crosschecked':
+        return 'crosschecked';
+      case 'datrichxuat':
+      case 'daextract':
+      case 'extract':
+      case 'extracted':
+      case 'completed':
+        return 'completed';
       default:
-        color = theme.palette.grey[500]; // fallback
+        return '';
     }
-    return { ...item, color };
-  });
+  };
+
+  const normalizedData = useMemo<NormalizedDatum[]>(() => {
+    const rawData = Array.isArray(totalJobNumber) ? totalJobNumber : [];
+
+    return rawData.map((item: any) => {
+      const candidates = [item?.key, item?.status, item?.label];
+      const normalizedKey = candidates
+        .map((candidate) => normalizeStatusKey(candidate))
+        .find((candidate): candidate is KnownStatusKey => Boolean(candidate));
+      const statusKey: StatusKey = normalizedKey ?? 'unknown';
+      const config = statusConfig[statusKey];
+      const numericValue = typeof item?.value === 'number' ? item.value : Number(item?.value) || 0;
+
+      return {
+        key: statusKey,
+        value: numericValue,
+        label: config.label,
+        color: config.color
+      };
+    });
+  }, [statusConfig, totalJobNumber]);
+
+  const chartData: NormalizedDatum[] = [
+    ...statusOrder.map((statusKey) => {
+      const matched = normalizedData.find((item) => item.key === statusKey);
+      const config = statusConfig[statusKey];
+
+      return {
+        key: statusKey,
+        value: matched?.value ?? 0,
+        label: config.label,
+        color: config.color
+      };
+    }),
+    ...normalizedData.filter((item) => !statusOrder.some((status) => status === item.key))
+  ];
 
   //sx style
   const DotSize = { display: 'flex', alignItems: 'center', gap: 1 };
   const ExpenseSize = { fontSize: '1rem', lineHeight: '1.5rem', fontWeight: 500 };
-  const total = (Array.isArray(chartData) ? chartData : []).reduce((acc: number, cur: any) => {
+  const total = chartData.reduce((acc: number, cur) => {
     const v = typeof cur?.value === 'number' ? cur.value : 0;
     return acc + v;
   }, 0);
@@ -114,19 +178,19 @@ export default function JobNumberPieChart() {
         <Grid container alignItems="center" spacing={1}>
           <Stack sx={{ alignItems: { xs: 'center', sm: 'flex-start' } }}>
             <Stack direction="row" sx={{ alignItems: 'center' }}>
-              <Typography variant='h5'>Job Number theo người dùng</Typography>
+              <Typography variant="h5">Job Numbers by User</Typography>
             </Stack>
           </Stack>
           <FormControl fullWidth sx={{ marginY: 3 }}>
-            <InputLabel id="user-select">Chọn User</InputLabel>
+            <InputLabel id="user-select">Select User</InputLabel>
             <Select
               labelId="user-select"
               id="user-select"
               value={selectedUser ?? "all"}
               onChange={handleChange}
-              label="Chọn User"
+              label="Select User"
             >
-              <MenuItem value="all">Tất cả</MenuItem>
+              <MenuItem value="all">All</MenuItem>
               {(userList ?? []).map((user: UserType) => (
                 <MenuItem key={user.id} value={user.id}>
                   {user.full_name}
@@ -138,7 +202,7 @@ export default function JobNumberPieChart() {
           <DatePicker
             format="dd/MM/yyyy"
             value={selectedDate}
-            label="Chọn Ngày/Tháng/Năm"
+            label="Select Date"
             onChange={handleDateChange}
             slotProps={{
               textField: {
@@ -161,8 +225,7 @@ export default function JobNumberPieChart() {
               margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
               series={[
                 {
-                  data: (chartData ?? []).map((d: any) => ({
-                    // đảm bảo mỗi item luôn có value/label/color hợp lệ
+                  data: chartData.map((d) => ({
                     value: typeof d?.value === 'number' ? d.value : 0,
                     label: d?.label ?? '',
                     color: d?.color ?? '#9e9e9e'
@@ -195,10 +258,10 @@ export default function JobNumberPieChart() {
               <Grid sx={DotSize} size="grow">
                 <Dot color="warning" size={12} />
                 <Typography variant="subtitle1" color="text.secondary">
-                  Mới
+                  New
                 </Typography>
               </Grid>
-              <Grid sx={ExpenseSize}>{chartData?.[0]?.value ?? 0}</Grid>
+              <Grid sx={ExpenseSize}>{chartData.find((item) => item.key === 'new')?.value ?? 0}</Grid>
             </Grid>
           </Grid>
           <Grid size={12}>
@@ -207,10 +270,10 @@ export default function JobNumberPieChart() {
               <Grid sx={DotSize} size="grow">
                 <Dot color="primary" size={12} />
                 <Typography variant="subtitle1" color="text.secondary">
-                  Sẵn sàng
+                  Ready
                 </Typography>
               </Grid>
-              <Grid sx={ExpenseSize}>{chartData?.[1]?.value ?? 0}</Grid>
+              <Grid sx={ExpenseSize}>{chartData.find((item) => item.key === 'ready')?.value ?? 0}</Grid>
             </Grid>
           </Grid>
           <Grid size={12}>
@@ -219,10 +282,10 @@ export default function JobNumberPieChart() {
               <Grid sx={DotSize} size="grow">
                 <Dot color="error" size={12} />
                 <Typography variant="subtitle1" color="text.secondary">
-                  Đã kiểm tra chéo
+                  Cross-checked
                 </Typography>
               </Grid>
-              <Grid sx={ExpenseSize}>{chartData?.[2]?.value ?? 0}</Grid>
+              <Grid sx={ExpenseSize}>{chartData.find((item) => item.key === 'crosschecked')?.value ?? 0}</Grid>
             </Grid>
           </Grid>
           <Grid size={12}>
@@ -231,10 +294,10 @@ export default function JobNumberPieChart() {
               <Grid sx={DotSize} size="grow">
                 <Dot color="success" size={12} />
                 <Typography variant="subtitle1" color="text.secondary">
-                  Đã trích xuất
+                  Extracted
                 </Typography>
               </Grid>
-              <Grid sx={ExpenseSize}>{chartData?.[3]?.value ?? 0}</Grid>
+              <Grid sx={ExpenseSize}>{chartData.find((item) => item.key === 'completed')?.value ?? 0}</Grid>
             </Grid>
           </Grid>
         </Grid>

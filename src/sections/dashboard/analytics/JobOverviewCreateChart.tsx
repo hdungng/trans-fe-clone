@@ -34,9 +34,9 @@ export default function JobOverviewCreateChart() {
             <Stack sx={{ alignItems: { xs: 'center', sm: 'flex-start' }, ml: { xs: 0, sm: 2 }, mt: 3 }}>
               <Stack direction="row" sx={{ gap: 0.5, alignItems: 'center' }}>
                 <Typography variant="h5">
-                  Thống kê Job Number{" "}
-                  {slot === "week" && `tuần ${getWeekOfMonth(currentDate)} `}
-                  tháng {currentDate.getMonth() + 1}
+                  Job Number Statistics{' '}
+                  {slot === 'week' && `Week ${getWeekOfMonth(currentDate)} `}
+                  Month {currentDate.getMonth() + 1}
                 </Typography>
               </Stack>
             </Stack>
@@ -48,10 +48,10 @@ export default function JobOverviewCreateChart() {
             >
               <ToggleButtonGroup exclusive onChange={handleChange} size="small" value={slot}>
                 <ToggleButton disabled={slot === 'week'} value="week" sx={{ px: 2, py: 0.5 }}>
-                  Tuần
+                  Week
                 </ToggleButton>
                 <ToggleButton disabled={slot === 'month'} value="month" sx={{ px: 2, py: 0.5 }}>
-                  Tháng
+                  Month
                 </ToggleButton>
               </ToggleButtonGroup>
               {/* <Select value={quantity} onChange={handleQuantity} size="small">
