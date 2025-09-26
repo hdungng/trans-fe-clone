@@ -5,7 +5,7 @@ import { GridSize } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import { convertDateString } from 'utils/formatDate';
 import { useIntl } from 'react-intl';
-import { formatImportFieldLabel } from './importFieldLabels';
+import { formatFieldLabel } from './fieldLabels';
 
 interface OptionField {
   code?: string;
@@ -33,7 +33,7 @@ interface DynamicFieldProps {
 
 export const FieldRenderer = ({ field, onChangeProp }: DynamicFieldProps) => {
     const intl = useIntl();
-    const label = formatImportFieldLabel(field, intl);
+    const label = formatFieldLabel(field, intl);
 
     return (
         <>
