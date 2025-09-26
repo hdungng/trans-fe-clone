@@ -3,7 +3,7 @@ import { Drawer, Menu, MenuItem, } from '@mui/material';
 import GuideAIForm from './GuideAIForm';
 import { useDefaultSetting } from 'pages/apps/default-setting/MainPage';
 import { useIntl } from 'react-intl';
-import { formatImportFieldLabel } from './importFieldLabels';
+import { formatFieldLabel } from './fieldLabels';
 
 interface ContextMenuProps {
     children: any;
@@ -38,7 +38,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ children }) => {
         } else {
             fieldKeyVar = children.props.field.key;
             fieldMethod = children.props.field.method;
-            fieldLabel = formatImportFieldLabel(children.props.field, intl);
+            fieldLabel = formatFieldLabel(children.props.field, intl);
         }
 
         setFieldKey(fieldKeyVar as string);

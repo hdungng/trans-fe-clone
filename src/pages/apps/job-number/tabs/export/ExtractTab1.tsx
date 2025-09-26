@@ -5,6 +5,7 @@ import { Field, useFormikContext } from "formik";
 import { InputLabel } from "@mui/material";
 import { comboBoxCustom } from "data/comboBoxCustom";
 import ContextMenu from "../../form/dynamic-fields/ContextMenu";
+import { useIntl } from "react-intl";
 
 
 export interface FormField {
@@ -24,12 +25,15 @@ export const ExtractImportTab1: React.FC<ExtractImportTab1Props> = React.memo(
     ({ generalFormFields1, isDefaultPage = false }) => {
 
         const { values, setFieldValue } = useFormikContext<any>();
+        const intl = useIntl();
 
         return (
             <Box>
                 <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thông tin cơ bản</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.export.detail.declaration.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields1.slice(0, 3)}
@@ -112,9 +116,13 @@ export const ExtractImportTab1: React.FC<ExtractImportTab1Props> = React.memo(
 
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thông tin đơn vị xuất nhập khẩu</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.export.detail.exporter.title' })}
+                        </Typography>
 
-                        <Typography variant="h5" sx={{ my: 2 }}>Người xuất khẩu</Typography>
+                        <Typography variant="h5" sx={{ my: 2 }}>
+                            {intl.formatMessage({ id: 'job-number.detail.extract.export.detail.exporter.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields1.slice(7, 12)}
@@ -122,7 +130,9 @@ export const ExtractImportTab1: React.FC<ExtractImportTab1Props> = React.memo(
                         isDefaultPage={isDefaultPage}
                     />
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Người ủy thác xuất khẩu</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.export.detail.exporter.consignor-name' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields1.slice(12, 14)}
@@ -130,7 +140,9 @@ export const ExtractImportTab1: React.FC<ExtractImportTab1Props> = React.memo(
                         isDefaultPage={isDefaultPage}
                     />
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Người nhập khẩu</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.export.detail.importer.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields1.slice(14, 23)}
@@ -138,11 +150,15 @@ export const ExtractImportTab1: React.FC<ExtractImportTab1Props> = React.memo(
                         isDefaultPage={isDefaultPage}
                     />
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Vận đơn</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.export.detail.bill-of-lading.title' })}
+                        </Typography>
                     </Grid>
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Số vận đơn</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.export.detail.bill-of-lading.section' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields1.slice(23, 30)}
@@ -184,7 +200,9 @@ export const ExtractImportTab1: React.FC<ExtractImportTab1Props> = React.memo(
 
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Chứng từ kèm theo</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.attachments.title' })}
+                        </Typography>
                     </Grid>
 
                     <DynamicField
@@ -218,7 +236,9 @@ export const ExtractImportTab1: React.FC<ExtractImportTab1Props> = React.memo(
                     />
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thông tin hóa đơn</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.invoice.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields1.slice(50, 61)}
@@ -227,7 +247,9 @@ export const ExtractImportTab1: React.FC<ExtractImportTab1Props> = React.memo(
                     />
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thuế và bảo lãnh</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.tax-guarantee.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields1.slice(61, 73)}
@@ -236,7 +258,9 @@ export const ExtractImportTab1: React.FC<ExtractImportTab1Props> = React.memo(
                     />
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thông tin đính kèm</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.attachments.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields1.slice(73, 75)}
@@ -257,7 +281,9 @@ export const ExtractImportTab1: React.FC<ExtractImportTab1Props> = React.memo(
                     />
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thông tin vận chuyển</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.transport.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields1.slice(79, 91)}
@@ -266,7 +292,9 @@ export const ExtractImportTab1: React.FC<ExtractImportTab1Props> = React.memo(
                     />
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thông tin khác</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.misc.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields1.slice(91, 93)}
