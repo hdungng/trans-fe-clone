@@ -1,5 +1,6 @@
 import React from 'react';
 // import { useSearchParams } from 'react-router-dom';
+import { useIntl } from 'react-intl';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -37,6 +38,7 @@ export default function AuthLogin({ isDemo = false }: { isDemo?: boolean }) {
   // const [checked, setChecked] = React.useState(false);
 
   const { login } = useAuth();
+  const intl = useIntl();
 
   const [showPassword, setShowPassword] = React.useState(false);
   const handleClickShowPassword = () => {
@@ -61,11 +63,18 @@ export default function AuthLogin({ isDemo = false }: { isDemo?: boolean }) {
           submit: null
         }}
         validationSchema={Yup.object().shape({
-          email: Yup.string().email('email không hợp lệ').max(255).required('Vui lòng nhập email'),
+          email: Yup.string()
+            .email(intl.formatMessage({ id: 'auth.login.validation.email-invalid' }))
+            .max(255, intl.formatMessage({ id: 'auth.login.validation.email-max' }))
+            .required(intl.formatMessage({ id: 'auth.login.validation.email-required' })),
           password: Yup.string()
-            .required('Vui lòng nhập mật khẩu')
-            .test('no-leading-trailing-whitespace', 'Mật khẩu không thể bắt đầu hoặc kết thúc với khoảng trắng', (value) => value === value.trim())
-            .max(10, 'Mật khẩu phải ít hơn 10 ký tự')
+            .required(intl.formatMessage({ id: 'auth.login.validation.password-required' }))
+            .test(
+              'no-leading-trailing-whitespace',
+              intl.formatMessage({ id: 'auth.login.validation.password-no-whitespace' }),
+              (value = '') => value.trim() === value
+            )
+            .max(10, intl.formatMessage({ id: 'auth.login.validation.password-max' }))
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
@@ -87,7 +96,7 @@ export default function AuthLogin({ isDemo = false }: { isDemo?: boolean }) {
             <Grid container spacing={3}>
               <Grid size={12}>
                 <Stack sx={{ gap: 1 }}>
-                  <InputLabel htmlFor="email-login">Email</InputLabel>
+                  <InputLabel htmlFor="email-login">{intl.formatMessage({ id: 'auth.login.label.email' })}</InputLabel>
                   <OutlinedInput
                     id="email-login"
                     type="email"
@@ -95,7 +104,7 @@ export default function AuthLogin({ isDemo = false }: { isDemo?: boolean }) {
                     name="email"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    placeholder="Nhập địa chỉ Email"
+                    placeholder={intl.formatMessage({ id: 'auth.login.placeholder.email' })}
                     fullWidth
                     error={Boolean(touched.email && errors.email)}
                   />
@@ -108,7 +117,7 @@ export default function AuthLogin({ isDemo = false }: { isDemo?: boolean }) {
               </Grid>
               <Grid size={12}>
                 <Stack sx={{ gap: 1 }}>
-                  <InputLabel htmlFor="password-login">Mật khẩu</InputLabel>
+                  <InputLabel htmlFor="password-login">{intl.formatMessage({ id: 'auth.login.label.password' })}</InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.password && errors.password)}
@@ -131,7 +140,7 @@ export default function AuthLogin({ isDemo = false }: { isDemo?: boolean }) {
                         </IconButton>
                       </InputAdornment>
                     }
-                    placeholder="Nhập mật khẩu"
+                    placeholder={intl.formatMessage({ id: 'auth.login.placeholder.password' })}
                   />
                 </Stack>
                 {touched.password && errors.password && (
@@ -172,7 +181,7 @@ export default function AuthLogin({ isDemo = false }: { isDemo?: boolean }) {
               <Grid size={12}>
                 <AnimateButton>
                   <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">
-                    Đăng nhập
+                    {intl.formatMessage({ id: 'auth.login.submit' })}
                   </Button>
                 </AnimateButton>
               </Grid>

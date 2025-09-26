@@ -1,5 +1,6 @@
 import { useEffect, useState, SyntheticEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useIntl } from 'react-intl';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -34,12 +35,21 @@ import { StringColorProps } from 'types/password';
 import EyeOutlined from '@ant-design/icons/EyeOutlined';
 import EyeInvisibleOutlined from '@ant-design/icons/EyeInvisibleOutlined';
 
+const strengthLabelMap: Record<string, string> = {
+  'Rất yếu': 'auth.password-strength.very-weak',
+  'Yếu': 'auth.password-strength.weak',
+  'Trung bình': 'auth.password-strength.average',
+  'Tốt': 'auth.password-strength.good',
+  'Rất tốt': 'auth.password-strength.very-good'
+};
+
 // ============================|| JWT - REGISTER ||============================ //
 
 export default function AuthRegister() {
   const { register } = useAuth();
   const scriptedRef = useScriptRef();
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const [level, setLevel] = useState<StringColorProps>();
   const [showPassword, setShowPassword] = useState(false);
@@ -73,12 +83,21 @@ export default function AuthRegister() {
           submit: null
         }}
         validationSchema={Yup.object().shape({
-          name: Yup.string().max(255).required('Vui lòng nhập họ và tên'),
-          email: Yup.string().email('Email không hợp lệ').max(255).required('Vui lòng nhập Email'),
+          name: Yup.string()
+            .max(255, intl.formatMessage({ id: 'auth.register.validation.full-name-max' }))
+            .required(intl.formatMessage({ id: 'auth.register.validation.full-name-required' })),
+          email: Yup.string()
+            .email(intl.formatMessage({ id: 'auth.register.validation.email-invalid' }))
+            .max(255, intl.formatMessage({ id: 'auth.register.validation.email-max' }))
+            .required(intl.formatMessage({ id: 'auth.register.validation.email-required' })),
           password: Yup.string()
-            .required('Vui lòng nhập mật khẩu')
-            .test('no-leading-trailing-whitespace', 'Vui lòng không để khoảng trắng ở đầu hoặc cuối mật khẩu', (value) => value === value.trim())
-            .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
+            .required(intl.formatMessage({ id: 'auth.register.validation.password-required' }))
+            .test(
+              'no-leading-trailing-whitespace',
+              intl.formatMessage({ id: 'auth.register.validation.password-no-whitespace' }),
+              (value = '') => value.trim() === value
+            )
+            .min(6, intl.formatMessage({ id: 'auth.register.validation.password-min' }))
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
@@ -89,7 +108,7 @@ export default function AuthRegister() {
               setSubmitting(false);
               openSnackbar({
                 open: true,
-                message: 'Đăng ký thành công.',
+                message: intl.formatMessage({ id: 'auth.register.notification.success' }),
                 variant: 'alert',
                 alert: {
                   color: 'success'
@@ -114,7 +133,7 @@ export default function AuthRegister() {
               
               <Grid size={12}>
                 <Stack sx={{ gap: 1 }}>
-                  <InputLabel htmlFor="name-signup">Họ và tên</InputLabel>
+                  <InputLabel htmlFor="name-signup">{intl.formatMessage({ id: 'auth.register.label.full-name' })}</InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.name && errors.name)}
@@ -124,7 +143,7 @@ export default function AuthRegister() {
                     name="name"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    placeholder="Tên đầy đủ"
+                    placeholder={intl.formatMessage({ id: 'auth.register.placeholder.full-name' })}
                   />
                 </Stack>
                 {touched.name && errors.name && (
@@ -135,7 +154,7 @@ export default function AuthRegister() {
               </Grid>
               <Grid size={12}>
                 <Stack sx={{ gap: 1 }}>
-                  <InputLabel htmlFor="email-signup">Email</InputLabel>
+                  <InputLabel htmlFor="email-signup">{intl.formatMessage({ id: 'auth.register.label.email' })}</InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.email && errors.email)}
@@ -145,7 +164,7 @@ export default function AuthRegister() {
                     name="email"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    placeholder="demo@gmail.com"
+                    placeholder={intl.formatMessage({ id: 'auth.register.placeholder.email' })}
                   />
                 </Stack>
                 {touched.email && errors.email && (
@@ -156,7 +175,7 @@ export default function AuthRegister() {
               </Grid>
               <Grid size={12}>
                 <Stack sx={{ gap: 1 }}>
-                  <InputLabel htmlFor="password-signup">Mật khẩu</InputLabel>
+                  <InputLabel htmlFor="password-signup">{intl.formatMessage({ id: 'auth.register.label.password' })}</InputLabel>
                   <OutlinedInput
                     fullWidth
                     error={Boolean(touched.password && errors.password)}
@@ -182,7 +201,7 @@ export default function AuthRegister() {
                         </IconButton>
                       </InputAdornment>
                     }
-                    placeholder="******"
+                    placeholder={intl.formatMessage({ id: 'auth.register.placeholder.password' })}
                   />
                 </Stack>
                 {touched.password && errors.password && (
@@ -197,7 +216,7 @@ export default function AuthRegister() {
                     </Grid>
                     <Grid>
                       <Typography variant="subtitle1" fontSize="0.75rem">
-                        {level?.label}
+                        {level?.label ? intl.formatMessage({ id: strengthLabelMap[level.label] ?? 'auth.password-strength.unknown' }) : ''}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -223,7 +242,7 @@ export default function AuthRegister() {
               <Grid size={12}>
                 <AnimateButton>
                   <Button disableElevation disabled={isSubmitting} fullWidth size="large" type="submit" variant="contained" color="primary">
-                    Tạo tài khoản
+                    {intl.formatMessage({ id: 'auth.register.submit' })}
                   </Button>
                 </AnimateButton>
               </Grid>
