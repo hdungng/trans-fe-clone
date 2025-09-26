@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useIntl } from 'react-intl';
 // material-ui
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -29,6 +30,7 @@ export default function ProfileTab({ handleLogout }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const intl = useIntl();
 
   const handleSubmit = async (data: UserFormData, { setSubmitting, setErrors }: any) => {
     try {
@@ -43,7 +45,7 @@ export default function ProfileTab({ handleLogout }: Props) {
           alert: {
             color: 'success'
           },
-          message: 'Cập nhật người dùng thành công',
+          message: intl.formatMessage({ id: 'header.profile-tab.notification.update-success' }),
           close: true
         } as SnackbarProps);
         setDialogOpen(false);
@@ -72,7 +74,9 @@ export default function ProfileTab({ handleLogout }: Props) {
         alert: {
           color: 'error'
         },
-        message: editingUser ? 'Cập nhật người dùng thất bại' : 'Tạo mới người dùng thất bại',
+        message: editingUser
+          ? intl.formatMessage({ id: 'header.profile-tab.notification.update-error' })
+          : intl.formatMessage({ id: 'header.profile-tab.notification.create-error' }),
         close: true
       } as SnackbarProps);
     };
@@ -98,13 +102,13 @@ export default function ProfileTab({ handleLogout }: Props) {
         <ListItemIcon>
           <UserOutlined />
         </ListItemIcon>
-        <ListItemText primary="Hồ sơ người dùng" />
+        <ListItemText primary={intl.formatMessage({ id: 'header.profile-tab.open-profile' })} />
       </ListItemButton>
       <ListItemButton selected={selectedIndex === 2} onClick={handleLogout}>
         <ListItemIcon>
           <LogoutOutlined />
         </ListItemIcon>
-        <ListItemText primary="Đăng xuất" />
+        <ListItemText primary={intl.formatMessage({ id: 'header.profile-tab.logout' })} />
       </ListItemButton>
 
       <UserFormDialog

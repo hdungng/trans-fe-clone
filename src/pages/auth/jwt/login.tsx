@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from 'react-router-dom';
+import { useIntl } from 'react-intl';
 
 // material-ui
 import Grid from '@mui/material/Grid';
@@ -14,6 +15,7 @@ import AuthLogin from 'sections/auth/jwt/AuthLogin';
 
 export default function Login() {
   const { isLoggedIn } = useAuth();
+  const intl = useIntl();
 
   const [searchParams] = useSearchParams();
   const auth = searchParams.get('auth');
@@ -23,7 +25,7 @@ export default function Login() {
       <Grid container spacing={3}>
         <Grid size={12}>
           <Stack direction="row" sx={{ alignItems: 'baseline', justifyContent: 'space-between', mb: { xs: -0.5, sm: 0.5 } }}>
-            <Typography variant="h3">Đăng nhập</Typography>
+            <Typography variant="h3">{intl.formatMessage({ id: 'auth.login.title' })}</Typography>
             <Typography
               component={Link}
               to={isLoggedIn ? '/auth/register' : auth ? `/${auth}/register?auth=jwt` : '/register'}
@@ -31,7 +33,7 @@ export default function Login() {
               sx={{ textDecoration: 'none' }}
               color="primary"
             >
-              Không có tài khoản ?
+              {intl.formatMessage({ id: 'auth.login.no-account' })}
             </Typography>
           </Stack>
         </Grid>
