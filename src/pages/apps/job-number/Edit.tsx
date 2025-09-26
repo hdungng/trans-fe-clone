@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // material-ui
 import Button from '@mui/material/Button';
@@ -23,10 +23,8 @@ import {
     useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material';
 import { handleStep1, handleStep2, reloadStep1, reloadStep2 } from './services/jobHandlers';
+import { useIntl } from 'react-intl';
 // import { Checkbox } from '@mui/material';
-
-// step options
-const steps = ['Thông tin Job Number', 'Tải lên chứng từ', 'Kiểm tra chứng từ', "Trích xuất thông tin và Nhập liệu"];
 
 let initialValue: InitForm = { jobNumber: '', taxCode: '', method: '', note: '', customs_procedure_type: '0', ignore_masterlist: false };
 
@@ -44,6 +42,7 @@ export default function JobNumberEdit({
     mode = 'add',
     status = 'new',
 }: JobNumberEditProps) {
+    const intl = useIntl();
     const [activeStep, setActiveStep] = useState(0);
     const [initFormData, setInitFormData] = useState<InitForm>(initialValue);
     const [initFormMode, setInitFormMode] = useState<'add' | 'edit'>(mode);
@@ -55,6 +54,16 @@ export default function JobNumberEdit({
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [statusState, setStatusState] = useState<string>(status);
     const [isECUSLoading, setIsECUSLoading] = useState<boolean>(false);
+
+    const steps = useMemo(
+        () => [
+            intl.formatMessage({ id: 'job-number.edit.step.job-info', defaultMessage: 'Job number information' }),
+            intl.formatMessage({ id: 'job-number.edit.step.upload', defaultMessage: 'Upload documents' }),
+            intl.formatMessage({ id: 'job-number.edit.step.crosscheck', defaultMessage: 'Crosscheck documents' }),
+            intl.formatMessage({ id: 'job-number.edit.step.extract', defaultMessage: 'Extract & input data' }),
+        ],
+        [intl]
+    );
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // mobile: xs & sm
@@ -340,7 +349,7 @@ export default function JobNumberEdit({
                         {activeStep !== 0 && (
                             <AnimateButton>
                                 <Button onClick={handleBack} sx={{ my: 1, ml: 1 }} disabled={isLoading}>
-                                    Quay lại
+                                    {intl.formatMessage({ id: 'job-number.edit.button.back', defaultMessage: 'Back' })}
                                 </Button>
                             </AnimateButton>
                         )}
@@ -353,7 +362,9 @@ export default function JobNumberEdit({
                             />} */}
                             <AnimateButton>
                                 <Button variant="contained" onClick={handleNext} sx={{ my: 3, ml: 1 }} disabled={isLoading || isECUSLoading}>
-                                    {activeStep === steps.length - 1 ? 'Gửi máy chủ nhập liệu' : 'Tiếp theo'}
+                                    {activeStep === steps.length - 1
+                                        ? intl.formatMessage({ id: 'job-number.edit.button.submit-server', defaultMessage: 'Send to data entry server' })
+                                        : intl.formatMessage({ id: 'job-number.edit.button.next', defaultMessage: 'Next' })}
                                 </Button>
                             </AnimateButton>
                         </Stack>

@@ -2,6 +2,7 @@ import { Box, Grid, Typography } from "@mui/material";
 import DynamicField from "../../form/dynamic-fields/DynamicField";
 import React from "react";
 import DeclarationTypeSyncOnCode7 from "../../form/dynamic-fields/handlers/DeclarationTypeSyncOnCode7";
+import { useIntl } from "react-intl";
 
 
 interface ExtractImportTab2Props {
@@ -11,6 +12,7 @@ interface ExtractImportTab2Props {
 
 export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
     ({ generalFormFields2, isDefaultPage = false }) => {
+        const intl = useIntl();
         return (
             <Box>
                 <Grid container spacing={3}>
@@ -20,8 +22,12 @@ export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
                         isDefaultPage={isDefaultPage}
                     />
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thông tin văn bản và giấy phép</Typography>
-                        <Typography variant="h5" sx={{ my: 2 }}>Mã văn bản pháp quy khác</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.legal-documents.title' })}
+                        </Typography>
+                        <Typography variant="h5" sx={{ my: 2 }}>
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.legal-documents.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields2.slice(3, 8)}
@@ -29,7 +35,9 @@ export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
                         isDefaultPage={isDefaultPage}
                     />
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Giấy phép nhập khẩu</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.import-license.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields2.slice(8, 13)}
@@ -38,7 +46,9 @@ export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
                     />
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Hóa đơn thương mại</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.invoice.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields2.slice(13, 22)}
@@ -46,7 +56,9 @@ export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
                         isDefaultPage={isDefaultPage}
                     />
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Tờ khai trị giá</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.value-declaration.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields2.slice(22, 26)}
@@ -54,8 +66,12 @@ export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
                         isDefaultPage={isDefaultPage}
                     />
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Các khoản điều chỉnh:</Typography>
-                        <Typography variant="h5" sx={{ my: 2 }}>Phí vận chuyển:</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.crosscheck.tables.expand.section.adjustment' })}
+                        </Typography>
+                        <Typography variant="h5" sx={{ my: 2 }}>
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.transport-fee.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields2.slice(26, 29)}
@@ -63,7 +79,9 @@ export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
                         isDefaultPage={isDefaultPage}
                     />
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Phí bảo hiểm:</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.insurance-fee.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields2.slice(29, 33)}
@@ -115,7 +133,9 @@ export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
                     />
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thuế và bảo lãnh</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.tax-guarantee.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields2.slice(60, 62)}
@@ -141,7 +161,9 @@ export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
                     />
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thông tin đính kèm</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.attachments.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields2.slice(70, 76)}
@@ -149,7 +171,9 @@ export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
                         isDefaultPage={isDefaultPage}
                     />
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thông tin vận chuyển</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.transport-info.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields2.slice(76, 78)}
@@ -157,7 +181,9 @@ export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
                         isDefaultPage={isDefaultPage}
                     />
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thông tin trung chuyển</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.transit.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields2.slice(78, 89)}
@@ -166,7 +192,9 @@ export const ExtractImportTab2: React.FC<ExtractImportTab2Props> = React.memo(
                     />
 
                     <Grid size={{ xs: 12 }}>
-                        <Typography variant="h5">Thông tin khác</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({ id: 'job-number.detail.extract.import.detail.misc.title' })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={generalFormFields2.slice(89, 91)}

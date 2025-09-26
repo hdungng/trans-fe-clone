@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { getClientsByTaxCode } from 'api/client';
 import { Theme } from '@mui/material';
+import { useIntl } from 'react-intl';
 
 interface TaxCodeAutocompleteProps {
     formik?: any;
@@ -31,6 +32,7 @@ const TaxCodeAutocomplete: React.FC<TaxCodeAutocompleteProps> = ({
     sx,
     handleSelect,
 }) => {
+    const intl = useIntl();
     const [inputValue, setInputValue] = useState('');
     const [options, setOptions] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -81,14 +83,18 @@ const TaxCodeAutocomplete: React.FC<TaxCodeAutocompleteProps> = ({
     return (
         // <Stack sx={{ gap: 1 }}>
         <>
-            {label && <InputLabel required={required} id='taxCode' sx={{ mb: 1 }}>{label}</InputLabel>}
+            {label && (
+                <InputLabel required={required} id='taxCode' sx={{ mb: 1 }}>
+                    {label ?? intl.formatMessage({ id: 'components.tax-code.label', defaultMessage: 'Tax code' })}
+                </InputLabel>
+            )}
             <Autocomplete
                 fullWidth
                 options={options}
                 loading={loading}
-                loadingText="Đang tải"
+                loadingText={intl.formatMessage({ id: 'components.tax-code.loading', defaultMessage: 'Loading…' })}
                 readOnly={isReadOnly}
-                noOptionsText="Không có dữ liệu"
+                noOptionsText={intl.formatMessage({ id: 'components.tax-code.no-options', defaultMessage: 'No data available' })}
                 freeSolo
                 // onChange={handleSelect}
                 value={formik?.values[name] || inputValue}
@@ -105,11 +111,11 @@ const TaxCodeAutocomplete: React.FC<TaxCodeAutocompleteProps> = ({
                         {...params}
                         id={name}
                         name={name}
-                        placeholder="Nhập mã số thuế..."
+                        placeholder={intl.formatMessage({ id: 'components.tax-code.placeholder', defaultMessage: 'Enter tax code…' })}
                         onChange={formik?.handleChange}
                         value={formik?.values[name]}
                         onBlur={formik?.handleBlur}
-                        label={isFloating ? 'Mã số thuế' : ''}
+                        label={isFloating ? intl.formatMessage({ id: 'components.tax-code.label', defaultMessage: 'Tax code' }) : ''}
                         error={formik?.touched[name] && Boolean(formik?.errors[name])}
                         helperText={formik?.touched[name] && formik?.errors[name]}
                         InputProps={{
