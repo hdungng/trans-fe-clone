@@ -1,5 +1,7 @@
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import { useEffect, useState } from 'react';
+import { useIntl } from 'react-intl';
 // project imports
 import MainCard from 'components/MainCard';
 import ReportCard from 'components/cards/statistics/ReportCard';
@@ -7,7 +9,6 @@ import { BarChartOutlined, FileDoneOutlined, FileTextOutlined, PlusSquareOutline
 import JobOverviewCreateChart from 'sections/dashboard/analytics/JobOverviewCreateChart';
 import RecentJobNumberTable from 'sections/dashboard/default/RecentJobNumberTable';
 import JobNumberPieChart from 'sections/apps/invoice/JobNumberPieChart';
-import { useEffect, useState } from 'react';
 import { APIResponse } from 'types/response';
 import { getTotalJobNumber } from 'api/dashboard';
 
@@ -16,6 +17,7 @@ import { getTotalJobNumber } from 'api/dashboard';
 export default function DashboardDefault() {
 
   const [totalJobNumber, setTotalJobNumber] = useState<any>();
+  const intl = useIntl();
 
   useEffect(() => {
     fetchData();
@@ -36,19 +38,41 @@ export default function DashboardDefault() {
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       {/* row 1 */}
       <Grid sx={{ mb: -2.25 }} size={12}>
-        <Typography variant="h5">Thống kê tất cả Job Number</Typography>
+        <Typography variant="h5">
+          {intl.formatMessage({ id: 'dashboard.default.job-number-overview', defaultMessage: 'Job Number Overview' })}
+        </Typography>
       </Grid>
       <Grid size={{ xs: 12, lg: 3, sm: 6 }}>
-        <ReportCard primary={totalJobNumber?.total || 0} secondary="Tổng số các Job Number" color="primary.light" iconPrimary={BarChartOutlined} />
+        <ReportCard
+          primary={totalJobNumber?.total || 0}
+          secondary={intl.formatMessage({ id: 'dashboard.default.card.total-job-numbers', defaultMessage: 'Total Job Numbers' })}
+          color="primary.light"
+          iconPrimary={BarChartOutlined}
+        />
       </Grid>
       <Grid size={{ xs: 12, lg: 3, sm: 6 }}>
-        <ReportCard primary={totalJobNumber?.new || 0} secondary="Mới" color="warning.main" iconPrimary={PlusSquareOutlined} />
+        <ReportCard
+          primary={totalJobNumber?.new || 0}
+          secondary={intl.formatMessage({ id: 'job-number.status.new', defaultMessage: 'New' })}
+          color="warning.main"
+          iconPrimary={PlusSquareOutlined}
+        />
       </Grid>
       <Grid size={{ xs: 12, lg: 3, sm: 6 }}>
-        <ReportCard primary={totalJobNumber?.crosschecked || 0} secondary="Đã Kiểm tra chéo" color="error.main" iconPrimary={FileTextOutlined} />
+        <ReportCard
+          primary={totalJobNumber?.crosschecked || 0}
+          secondary={intl.formatMessage({ id: 'job-number.status.crosschecked', defaultMessage: 'Cross-checked' })}
+          color="error.main"
+          iconPrimary={FileTextOutlined}
+        />
       </Grid>
       <Grid size={{ xs: 12, lg: 3, sm: 6 }}>
-        <ReportCard primary={totalJobNumber?.completed || 0} secondary="Đã Trích Xuất" color="success.main" iconPrimary={FileDoneOutlined} />
+        <ReportCard
+          primary={totalJobNumber?.completed || 0}
+          secondary={intl.formatMessage({ id: 'job-number.status.completed', defaultMessage: 'Extracted' })}
+          color="success.main"
+          iconPrimary={FileDoneOutlined}
+        />
       </Grid>
 
       <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
@@ -63,7 +87,9 @@ export default function DashboardDefault() {
       <Grid size={{ xs: 12, md: 12, lg: 12 }}>
         <Grid container alignItems="center" justifyContent="space-between">
           <Grid>
-            <Typography variant="h5">Job Number gần đây</Typography>
+            <Typography variant="h5">
+              {intl.formatMessage({ id: 'dashboard.default.recent-job-numbers', defaultMessage: 'Recent Job Numbers' })}
+            </Typography>
           </Grid>
           <Grid />
         </Grid>

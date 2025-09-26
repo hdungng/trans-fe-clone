@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useIntl } from 'react-intl';
 
 // material-ui
 import Grid from '@mui/material/Grid';
@@ -18,6 +19,7 @@ import JobNumberBarChart from '../default/JobNumberBarChart';
 export default function JobOverviewCreateChart() {
   const [slot, setSlot] = useState<'month' | 'week'>('week');
   const currentDate = new Date();
+  const intl = useIntl();
   // const handleQuantity = (e: SelectChangeEvent) => {
   //   setQuantity(e.target.value as 'By margin' | 'By sales' | 'By volume');
   // };
@@ -25,6 +27,18 @@ export default function JobOverviewCreateChart() {
   const handleChange = (event: React.MouseEvent<HTMLElement>, newAlignment: 'month' | 'week') => {
     if (newAlignment) setSlot(newAlignment);
   };
+
+  const weekLabel =
+    slot === 'week'
+      ? intl.formatMessage({ id: 'dashboard.analytics.job-overview.week-label', defaultMessage: 'Week {week} ' }, {
+          week: getWeekOfMonth(currentDate)
+        })
+      : '';
+
+  const monthLabel = intl.formatMessage(
+    { id: 'dashboard.analytics.job-overview.month-label', defaultMessage: 'Month {month}' },
+    { month: currentDate.getMonth() + 1 }
+  );
 
   return (
     <MainCard content={false}>
@@ -34,9 +48,10 @@ export default function JobOverviewCreateChart() {
             <Stack sx={{ alignItems: { xs: 'center', sm: 'flex-start' }, ml: { xs: 0, sm: 2 }, mt: 3 }}>
               <Stack direction="row" sx={{ gap: 0.5, alignItems: 'center' }}>
                 <Typography variant="h5">
-                  Thống kê Job Number{" "}
-                  {slot === "week" && `tuần ${getWeekOfMonth(currentDate)} `}
-                  tháng {currentDate.getMonth() + 1}
+                  {intl.formatMessage(
+                    { id: 'dashboard.analytics.job-overview.title', defaultMessage: 'Job Number Statistics {period}' },
+                    { period: `${weekLabel}${monthLabel}` }
+                  )}
                 </Typography>
               </Stack>
             </Stack>
@@ -48,10 +63,10 @@ export default function JobOverviewCreateChart() {
             >
               <ToggleButtonGroup exclusive onChange={handleChange} size="small" value={slot}>
                 <ToggleButton disabled={slot === 'week'} value="week" sx={{ px: 2, py: 0.5 }}>
-                  Tuần
+                  {intl.formatMessage({ id: 'dashboard.analytics.job-overview.toggle.week', defaultMessage: 'Week' })}
                 </ToggleButton>
                 <ToggleButton disabled={slot === 'month'} value="month" sx={{ px: 2, py: 0.5 }}>
-                  Tháng
+                  {intl.formatMessage({ id: 'dashboard.analytics.job-overview.toggle.month', defaultMessage: 'Month' })}
                 </ToggleButton>
               </ToggleButtonGroup>
               {/* <Select value={quantity} onChange={handleQuantity} size="small">

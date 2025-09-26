@@ -1,5 +1,6 @@
 // material-ui
 import { useTheme } from '@mui/material/styles';
+import { useIntl } from 'react-intl';
 
 import { BarChart } from '@mui/x-charts/BarChart';
 import { getJobNumberByDate } from 'api/dashboard';
@@ -14,6 +15,7 @@ interface JobNumberDateChartProps {
 
 export default function JobNumberBarChart({ slot }: JobNumberDateChartProps) {
   const theme = useTheme();
+  const intl = useIntl();
   const axisFonstyle = { fontSize: 10, fill: theme.palette.text.secondary };
 
   const [data, setData] = useState<number[]>([]);
@@ -45,7 +47,12 @@ export default function JobNumberBarChart({ slot }: JobNumberDateChartProps) {
     <BarChart
       hideLegend
       height={380}
-      series={[{ data, label: 'Số Job Number' }]}
+      series={[
+        {
+          data,
+          label: intl.formatMessage({ id: 'dashboard.charts.job-number-bar.series-label', defaultMessage: 'Job Numbers' })
+        }
+      ]}
       xAxis={[{ data: labels, scaleType: 'band', disableLine: true, disableTicks: true, tickLabelStyle: axisFonstyle }]}
       yAxis={[{ position: 'none' }]}
       slotProps={{ bar: { rx: 5, ry: 5 } }}

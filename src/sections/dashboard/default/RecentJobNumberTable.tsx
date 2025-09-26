@@ -9,7 +9,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useIntl } from 'react-intl';
 
 // API + types
 import { APIResponse } from 'types/response';
@@ -69,15 +70,40 @@ function stableSort<T>(array: readonly T[], comparator: (a: T, b: T) => number) 
 interface HeadCell {
   disablePadding: boolean;
   id: keyof Data;
-  label: string;
+  labelId: string;
+  defaultMessage: string;
   align: 'center' | 'left' | 'right' | 'inherit' | 'justify' | undefined;
 }
 
 const headCells: readonly HeadCell[] = [
-  { id: 'name', align: 'left', disablePadding: false, label: 'Tên Job Number' },
-  { id: 'company_name', align: 'left', disablePadding: true, label: 'Công ty' },
-  { id: 'method', align: 'right', disablePadding: false, label: 'Tác nghiệp' },
-  { id: 'status', align: 'left', disablePadding: false, label: 'Trạng thái' }
+  {
+    id: 'name',
+    align: 'left',
+    disablePadding: false,
+    labelId: 'dashboard.recent-job-number.table.column.job-number',
+    defaultMessage: 'Job Number'
+  },
+  {
+    id: 'company_name',
+    align: 'left',
+    disablePadding: true,
+    labelId: 'dashboard.recent-job-number.table.column.company',
+    defaultMessage: 'Company'
+  },
+  {
+    id: 'method',
+    align: 'right',
+    disablePadding: false,
+    labelId: 'dashboard.recent-job-number.table.column.operation',
+    defaultMessage: 'Operation'
+  },
+  {
+    id: 'status',
+    align: 'left',
+    disablePadding: false,
+    labelId: 'dashboard.recent-job-number.table.column.status',
+    defaultMessage: 'Status'
+  }
 ];
 
 interface RecentJobNumberTableProps {
@@ -86,6 +112,8 @@ interface RecentJobNumberTableProps {
 }
 
 function RecentJobNumberTable({ order, orderBy }: RecentJobNumberTableProps) {
+  const intl = useIntl();
+
   return (
     <TableHead>
       <TableRow>
@@ -96,7 +124,7 @@ function RecentJobNumberTable({ order, orderBy }: RecentJobNumberTableProps) {
             padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
-            {headCell.label}
+            {intl.formatMessage({ id: headCell.labelId, defaultMessage: headCell.defaultMessage })}
           </TableCell>
         ))}
       </TableRow>
@@ -107,29 +135,30 @@ function RecentJobNumberTable({ order, orderBy }: RecentJobNumberTableProps) {
 // ==============================|| ORDER STATUS ||============================== //
 
 function OrderStatus({ status }: { status: string }) {
+  const intl = useIntl();
   let color: ColorProps;
   let title: string;
 
   switch (status) {
     case 'new':
       color = 'warning';
-      title = 'Mới';
+      title = intl.formatMessage({ id: 'job-number.status.new', defaultMessage: 'New' });
       break;
     case 'completed':
       color = 'success';
-      title = 'Đã Extract';
+      title = intl.formatMessage({ id: 'job-number.status.completed', defaultMessage: 'Extracted' });
       break;
     case 'crosschecked':
       color = 'error';
-      title = 'Đã Crosschecked';
+      title = intl.formatMessage({ id: 'job-number.status.crosschecked', defaultMessage: 'Cross-checked' });
       break;
     case 'ready':
       color = 'primary';
-      title = 'Sẵn sàng';
+      title = intl.formatMessage({ id: 'job-number.status.ready', defaultMessage: 'Ready' });
       break;
     default:
       color = 'primary';
-      title = 'Không rõ';
+      title = intl.formatMessage({ id: 'common.unknown', defaultMessage: 'Unknown' });
   }
 
   return (
@@ -147,40 +176,43 @@ export default function OrderTable() {
   const orderBy: keyof Data = 'name';
 
   const [recentJobNumber, setRecentJobNumber] = useState<Data[]>([]);
+  const intl = useIntl();
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-  const res: APIResponse = await getJobNumberRecent();
+    const res: APIResponse = await getJobNumberRecent();
 
-  if (res.status === 'success' && Array.isArray(res.data)) {
-    const sorted = res.data
-      .filter((item: Data) => item.projects?.[0]?.created_at) // bỏ những item không có project hoặc created_at
-      .sort((a: Data, b: Data) => {
-        const dateA = new Date(a.projects[0].created_at).getTime();
-        const dateB = new Date(b.projects[0].created_at).getTime();
-        return dateB - dateA; // mới nhất lên đầu
-      })
-      .slice(0, 6); // lấy 6 cái gần nhất
+    if (res.status === 'success' && Array.isArray(res.data)) {
+      const sorted = res.data
+        .filter((item: Data) => item.projects?.[0]?.created_at) // skip items without projects or creation date
+        .sort((a: Data, b: Data) => {
+          const dateA = new Date(a.projects[0].created_at).getTime();
+          const dateB = new Date(b.projects[0].created_at).getTime();
+          return dateB - dateA; // newest first
+        })
+        .slice(0, 6); // keep the 6 most recent records
 
-    setRecentJobNumber(sorted);
-  } else {
-    setRecentJobNumber([]);
-  }
-};
-
-  function getOperate(method : string) : string{
-    switch(method){
-      case 'import':
-        return 'Nhập khẩu';
-      case 'export':
-        return 'Xuất khẩu';
-      default:
-        return 'Không xác định';
+      setRecentJobNumber(sorted);
+    } else {
+      setRecentJobNumber([]);
     }
-  }
+  };
+
+  const getOperate = useMemo(() => {
+    return (method: string): string => {
+      switch (method) {
+        case 'import':
+          return intl.formatMessage({ id: 'job-number.method.import', defaultMessage: 'Import' });
+        case 'export':
+          return intl.formatMessage({ id: 'job-number.method.export', defaultMessage: 'Export' });
+        default:
+          return intl.formatMessage({ id: 'common.unknown', defaultMessage: 'Unknown' });
+      }
+    };
+  }, [intl]);
 
   return (
     <Box>
