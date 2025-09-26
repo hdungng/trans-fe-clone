@@ -28,6 +28,7 @@ import { Alert } from '@mui/material';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import { mockFormImportDefault } from '../job-number/form/formik/ImportDefaultFormik';
 import { mockFormExportDefault } from '../job-number/form/formik/ExportDefaultFormik';
+import { useIntl } from 'react-intl';
 
 const TRASAS_TAX_CODE = '0304184415';
 
@@ -68,6 +69,7 @@ export const useDefaultSetting = () => {
 export default function MainPage() {
 
 
+    const intl = useIntl();
     const [tab, setTab] = useState(1);
 
     const validationSchema = yup.object({});
@@ -156,11 +158,15 @@ export default function MainPage() {
             <CardContent sx={{ p: 3 }}>
 
                 <MainCard sx={{ mb: 3 }}>
-                    <Typography variant='h5' sx={{ mb: 5 }}>Nhập thông tin</Typography>
+                    <Typography variant='h5' sx={{ mb: 5 }}>
+                        {intl.formatMessage({ id: 'default-setting.section.input-info', defaultMessage: 'Enter information' })}
+                    </Typography>
 
                     <Stack direction={{ xs: 'column', sm: 'row' }} gap={3} sx={{ mb: 5 }} alignItems={{ xs: 'start', sm: 'center' }}>
                         <FormControl sx={{ width: { xs: '100%', sm: 250 } }}>
-                            <InputLabel id="method">Tác nghiệp</InputLabel>
+                            <InputLabel id="method">
+                                {intl.formatMessage({ id: 'default-setting.field.method', defaultMessage: 'Operation' })}
+                            </InputLabel>
                             <Select
                                 id='method'
                                 value={method}
@@ -169,10 +175,18 @@ export default function MainPage() {
                                     setTab(1);
                                 }}
                                 displayEmpty
-                                slotProps={{ input: { 'aria-label': 'Chọn tác nghiệp' } }}
+                                slotProps={{
+                                    input: {
+                                        'aria-label': intl.formatMessage({ id: 'default-setting.aria.method', defaultMessage: 'Select operation' })
+                                    }
+                                }}
                             >
-                                <MenuItem value='import'>Nhập khẩu</MenuItem>
-                                <MenuItem value='export'>Xuất khẩu</MenuItem>
+                                <MenuItem value='import'>
+                                    {intl.formatMessage({ id: 'default-setting.method.import', defaultMessage: 'Import' })}
+                                </MenuItem>
+                                <MenuItem value='export'>
+                                    {intl.formatMessage({ id: 'default-setting.method.export', defaultMessage: 'Export' })}
+                                </MenuItem>
                             </Select>
                         </FormControl>
 
@@ -181,11 +195,19 @@ export default function MainPage() {
                         </Stack>
 
                         {filterClient?.tax_code === TRASAS_TAX_CODE && <Stack sx={{ minWidth: { xs: '100%', sm: 'unset' } }}>
-                            <TRASASCustomerSelect name='customer' label='Khách hàng' isFloating={true} sx={{ width: { sm: 300 } }} handleSelect={handleSelectCustomer} />
+                            <TRASASCustomerSelect
+                                name='customer'
+                                label={intl.formatMessage({ id: 'default-setting.field.customer', defaultMessage: 'Customer' })}
+                                isFloating={true}
+                                sx={{ width: { sm: 300 } }}
+                                handleSelect={handleSelectCustomer}
+                            />
                         </Stack>}
 
                         <FormControl sx={{ width: { xs: '100%', sm: 300 } }}>
-                            <InputLabel id="customsProcedureType">Loại hình kinh doanh</InputLabel>
+                            <InputLabel id="customsProcedureType">
+                                {intl.formatMessage({ id: 'default-setting.field.customs-procedure', defaultMessage: 'Customs procedure type' })}
+                            </InputLabel>
                             <Select
                                 id='customsProcedureType'
                                 value={customsProcedureType}
@@ -194,12 +216,24 @@ export default function MainPage() {
                                     setTab(1);
                                 }}
                                 displayEmpty
-                                slotProps={{ input: { 'aria-label': 'Chọn loại hình kinh doanh' } }}
+                                slotProps={{
+                                    input: {
+                                        'aria-label': intl.formatMessage({ id: 'default-setting.aria.customs-procedure', defaultMessage: 'Select customs procedure type' })
+                                    }
+                                }}
                             >
-                                <MenuItem value='0'>Kinh doanh, đầu tư</MenuItem>
-                                <MenuItem value='1'>Sản xuất xuất khẩu</MenuItem>
-                                <MenuItem value='2'>Gia công</MenuItem>
-                                <MenuItem value='3'>Chế xuất</MenuItem>
+                                <MenuItem value='0'>
+                                    {intl.formatMessage({ id: 'default-setting.customs-procedure.business', defaultMessage: 'Business, investment' })}
+                                </MenuItem>
+                                <MenuItem value='1'>
+                                    {intl.formatMessage({ id: 'default-setting.customs-procedure.manufacturing', defaultMessage: 'Export production' })}
+                                </MenuItem>
+                                <MenuItem value='2'>
+                                    {intl.formatMessage({ id: 'default-setting.customs-procedure.processing', defaultMessage: 'Processing' })}
+                                </MenuItem>
+                                <MenuItem value='3'>
+                                    {intl.formatMessage({ id: 'default-setting.customs-procedure.export-processing', defaultMessage: 'Export processing zone' })}
+                                </MenuItem>
                             </Select>
                         </FormControl>
                     </Stack>
@@ -208,7 +242,9 @@ export default function MainPage() {
 
                 {filterClient && method && <>
                     <MainCard>
-                        <Typography variant='h5' sx={{ my: 3 }}>Thông tin thông số mặc định</Typography>
+                        <Typography variant='h5' sx={{ my: 3 }}>
+                            {intl.formatMessage({ id: 'default-setting.section.default-values', defaultMessage: 'Default parameter information' })}
+                        </Typography>
 
                         {
                             isLoading && (
@@ -228,7 +264,7 @@ export default function MainPage() {
                             icon={<QuestionCircleOutlined />}
                             sx={{ my: 3 }}
                         >
-                            Click chuột phải vào từng trường để cập nhật Hướng dẫn AI.
+                            {intl.formatMessage({ id: 'default-setting.alert.context-menu', defaultMessage: 'Right-click each field to update the AI instruction.' })}
                         </Alert>}
 
 
@@ -236,9 +272,9 @@ export default function MainPage() {
                             method === "import" && !isLoading &&
                             (
                                 <Tabs value={tab} onChange={handleTabChange} sx={{ mb: 5 }}>
-                                    <Tab label="Thông tin chung 1" value={1} />
-                                    <Tab label="Thông tin chung 2" value={2} />
-                                    <Tab label="Danh sách hàng" value={3} />
+                                    <Tab label={intl.formatMessage({ id: 'default-setting.tab.import.general1', defaultMessage: 'General information 1' })} value={1} />
+                                    <Tab label={intl.formatMessage({ id: 'default-setting.tab.import.general2', defaultMessage: 'General information 2' })} value={2} />
+                                    <Tab label={intl.formatMessage({ id: 'default-setting.tab.import.products', defaultMessage: 'Product list' })} value={3} />
                                 </Tabs>
                             )
                         }
@@ -247,9 +283,9 @@ export default function MainPage() {
                             method === "export" && !isLoading &&
                             (
                                 <Tabs value={tab} onChange={handleTabChange} sx={{ mb: 5 }}>
-                                    <Tab label="Thông tin chung" value={1} />
-                                    <Tab label="Thông tin Container" value={2} />
-                                    <Tab label="Danh sách hàng" value={3} />
+                                    <Tab label={intl.formatMessage({ id: 'default-setting.tab.export.general', defaultMessage: 'General information' })} value={1} />
+                                    <Tab label={intl.formatMessage({ id: 'default-setting.tab.export.container', defaultMessage: 'Container information' })} value={2} />
+                                    <Tab label={intl.formatMessage({ id: 'default-setting.tab.export.products', defaultMessage: 'Product list' })} value={3} />
                                 </Tabs>
                             )
                         }
@@ -274,7 +310,7 @@ export default function MainPage() {
                                                 alert: {
                                                     color: 'success'
                                                 },
-                                                message: 'Cập nhật giá trị mặc định thành công',
+                                                message: intl.formatMessage({ id: 'default-setting.snackbar.update-success', defaultMessage: 'Default values updated successfully' }),
                                                 close: true
                                             } as SnackbarProps);
                                         }
@@ -300,7 +336,7 @@ export default function MainPage() {
                                                 sx={{ marginY: 3, justifyContent: 'flex-end' }}
                                             >
                                                 <Button type="submit" variant="contained">
-                                                    Cập nhật
+                                                    {intl.formatMessage({ id: 'default-setting.button.update', defaultMessage: 'Update' })}
                                                 </Button>
                                             </Stack>
                                         </form>
@@ -331,7 +367,7 @@ export default function MainPage() {
                                                     alert: {
                                                         color: 'success'
                                                     },
-                                                    message: 'Cập nhật giá trị mặc định thành công',
+                                                    message: intl.formatMessage({ id: 'default-setting.snackbar.update-success', defaultMessage: 'Default values updated successfully' }),
                                                     close: true
                                                 } as SnackbarProps);
                                             }
@@ -357,7 +393,7 @@ export default function MainPage() {
                                                     sx={{ marginY: 3, justifyContent: 'flex-end' }}
                                                 >
                                                     <Button type="submit" variant="contained">
-                                                        Cập nhật
+                                                        {intl.formatMessage({ id: 'default-setting.button.update', defaultMessage: 'Update' })}
                                                     </Button>
                                                 </Stack>
                                             </form>

@@ -10,6 +10,7 @@ import {
 import { Theme } from '@mui/material';
 import { getClientsTRASAS } from 'api/client';
 import { FormHelperText } from '@mui/material';
+import { useIntl } from 'react-intl';
 
 interface TRASASCustomerSelectProps {
     formik?: any;
@@ -32,6 +33,7 @@ const TRASASCustomerSelect: React.FC<TRASASCustomerSelectProps> = ({
     sx,
     handleSelect
 }) => {
+    const intl = useIntl();
     const [options, setOptions] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [selectedId, setSelectedId] = useState<string | number | ''>(''); // Sử dụng useState để lưu giá trị đã chọn
@@ -74,27 +76,32 @@ const TRASASCustomerSelect: React.FC<TRASASCustomerSelectProps> = ({
 
     return (
         <FormControl required={required} disabled={isReadOnly} sx={sx}>
-            {label && <InputLabel shrink={isFloating} id={`${name}-label`} required={required}>{label}</InputLabel>}
+            {label && (
+                <InputLabel shrink={isFloating} id={`${name}-label`} required={required}>
+                    {label ?? intl.formatMessage({ id: 'components.trasas-customer.label', defaultMessage: 'Customer' })}
+                </InputLabel>
+            )}
             <Select
                 labelId={`${name}-label`}
                 id={name}
                 name={name}
-                label={isFloating ? 'Khách hàng' : ''}
+                label={isFloating ? intl.formatMessage({ id: 'components.trasas-customer.label', defaultMessage: 'Customer' }) : ''}
                 value={selectedId}
                 onChange={onChange}
                 displayEmpty
                 renderValue={(value) => {
-                    if (!value) return 'Chọn khách hàng';
+                    if (!value) return intl.formatMessage({ id: 'components.trasas-customer.placeholder', defaultMessage: 'Select customer' });
                     return selectedOption?.customer ?? value;
                 }}
             >
                 {loading && (
                     <MenuItem disabled>
-                        <CircularProgress size={18} sx={{ mr: 1 }} /> Đang tải...
+                        <CircularProgress size={18} sx={{ mr: 1 }} />
+                        {intl.formatMessage({ id: 'components.trasas-customer.loading', defaultMessage: 'Loading…' })}
                     </MenuItem>
                 )}
                 {!loading && options.length === 0 && (
-                    <MenuItem disabled>Không có dữ liệu</MenuItem>
+                    <MenuItem disabled>{intl.formatMessage({ id: 'components.trasas-customer.no-options', defaultMessage: 'No data available' })}</MenuItem>
                 )}
                 {!loading &&
                     options.map((opt) => (
