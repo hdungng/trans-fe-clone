@@ -6,16 +6,23 @@ import { Box } from '@mui/material';
 import { defaultProductFormFieldsControlExport } from 'types/extract-form-field/default-product-form';
 import { Field, useFormikContext } from 'formik';
 import ContextMenu from 'pages/apps/job-number/form/dynamic-fields/ContextMenu';
+import { useIntl } from 'react-intl';
 
 
 const ExportProductDefault: React.FC = () => {
     const { setFieldValue } = useFormikContext();
+    const intl = useIntl();
 
     return (
         <Box>
             <Grid container spacing={3}>
                 <Grid>
-                    <Typography variant="h5">Cập nhật thông số mặc định sản phẩm</Typography>
+                    <Typography variant="h5">
+                        {intl.formatMessage({
+                            id: 'default-setting.product.update-default-parameters',
+                            defaultMessage: 'Update default product parameters'
+                        })}
+                    </Typography>
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 12, lg: 12 }}>
@@ -27,7 +34,10 @@ const ExportProductDefault: React.FC = () => {
                             export
                         </Box>
                         <Box component="span" sx={{ display: 'none' }}>
-                            Tùy chọn nhập mã hàng
+                            {intl.formatMessage({
+                                id: 'default-setting.product.item-code-option-label',
+                                defaultMessage: 'Item code entry option'
+                            })}
                         </Box>
                         <Stack sx={{ gap: 1 }}>
                             <FormGroup>
@@ -41,7 +51,10 @@ const ExportProductDefault: React.FC = () => {
                                                     onChange={() => setFieldValue('item_code_option', !field.value)}
                                                 />
                                             }
-                                            label="Tùy chọn nhập mã hàng"
+                                            label={intl.formatMessage({
+                                                id: 'default-setting.product.item-code-option-label',
+                                                defaultMessage: 'Item code entry option'
+                                            })}
                                         />
                                     )}
                                 </Field>
@@ -57,7 +70,12 @@ const ExportProductDefault: React.FC = () => {
                     />
 
                     <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}>
-                        <Typography variant="h5">Số lượng và đơn vị</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({
+                                id: 'default-setting.product.export.quantity-section',
+                                defaultMessage: 'Quantity and units'
+                            })}
+                        </Typography>
                     </Grid>
 
                     <DynamicField
@@ -67,7 +85,12 @@ const ExportProductDefault: React.FC = () => {
                     />
 
                     <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}>
-                        <Typography variant="h5">Đơn giá và tiền tệ</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({
+                                id: 'default-setting.product.export.unit-price-section',
+                                defaultMessage: 'Unit price and currency'
+                            })}
+                        </Typography>
                     </Grid>
 
                     <DynamicField
@@ -77,7 +100,12 @@ const ExportProductDefault: React.FC = () => {
                     />
 
                     <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}>
-                        <Typography variant="h5">Thuế xuất nhập khẩu</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({
+                                id: 'default-setting.product.export.tax-section',
+                                defaultMessage: 'Export/import taxes'
+                            })}
+                        </Typography>
                     </Grid>
 
                     <DynamicField
@@ -87,7 +115,12 @@ const ExportProductDefault: React.FC = () => {
                     />
 
                     <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}>
-                        <Typography variant="h5">Tờ khai tạm nhập/tái xuất</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({
+                                id: 'default-setting.product.export.temporary-declaration-section',
+                                defaultMessage: 'Temporary import/export declaration'
+                            })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={defaultProductFormFieldsControlExport.slice(21, 24)}
@@ -96,7 +129,12 @@ const ExportProductDefault: React.FC = () => {
                     />
 
                     <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}>
-                        <Typography variant="h5">Pháp lý liên quan</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({
+                                id: 'default-setting.product.export.legal-section',
+                                defaultMessage: 'Related legal documents'
+                            })}
+                        </Typography>
                     </Grid>
 
                     <DynamicField
@@ -107,7 +145,12 @@ const ExportProductDefault: React.FC = () => {
 
 
                     <Grid size={{ xs: 12 }} sx={{ marginY: 3 }}>
-                        <Typography variant="h5">Thông tin bổ sung</Typography>
+                        <Typography variant="h5">
+                            {intl.formatMessage({
+                                id: 'default-setting.product.export.additional-info-section',
+                                defaultMessage: 'Additional information'
+                            })}
+                        </Typography>
                     </Grid>
                     <DynamicField
                         fields={defaultProductFormFieldsControlExport.slice(29, 31)}
