@@ -74,10 +74,10 @@ interface HeadCell {
 }
 
 const headCells: readonly HeadCell[] = [
-  { id: 'name', align: 'left', disablePadding: false, label: 'Tên Job Number' },
-  { id: 'company_name', align: 'left', disablePadding: true, label: 'Công ty' },
-  { id: 'method', align: 'right', disablePadding: false, label: 'Tác nghiệp' },
-  { id: 'status', align: 'left', disablePadding: false, label: 'Trạng thái' }
+  { id: 'name', align: 'left', disablePadding: false, label: 'Job Number' },
+  { id: 'company_name', align: 'left', disablePadding: true, label: 'Company' },
+  { id: 'method', align: 'right', disablePadding: false, label: 'Operation' },
+  { id: 'status', align: 'left', disablePadding: false, label: 'Status' }
 ];
 
 interface RecentJobNumberTableProps {
@@ -113,23 +113,23 @@ function OrderStatus({ status }: { status: string }) {
   switch (status) {
     case 'new':
       color = 'warning';
-      title = 'Mới';
+      title = 'New';
       break;
     case 'completed':
       color = 'success';
-      title = 'Đã Extract';
+      title = 'Extracted';
       break;
     case 'crosschecked':
       color = 'error';
-      title = 'Đã Crosschecked';
+      title = 'Cross-checked';
       break;
     case 'ready':
       color = 'primary';
-      title = 'Sẵn sàng';
+      title = 'Ready';
       break;
     default:
       color = 'primary';
-      title = 'Không rõ';
+      title = 'Unknown';
   }
 
   return (
@@ -153,32 +153,32 @@ export default function OrderTable() {
   }, []);
 
   const fetchData = async () => {
-  const res: APIResponse = await getJobNumberRecent();
+    const res: APIResponse = await getJobNumberRecent();
 
-  if (res.status === 'success' && Array.isArray(res.data)) {
-    const sorted = res.data
-      .filter((item: Data) => item.projects?.[0]?.created_at) // bỏ những item không có project hoặc created_at
-      .sort((a: Data, b: Data) => {
-        const dateA = new Date(a.projects[0].created_at).getTime();
-        const dateB = new Date(b.projects[0].created_at).getTime();
-        return dateB - dateA; // mới nhất lên đầu
-      })
-      .slice(0, 6); // lấy 6 cái gần nhất
+    if (res.status === 'success' && Array.isArray(res.data)) {
+      const sorted = res.data
+        .filter((item: Data) => item.projects?.[0]?.created_at) // skip items without projects or creation date
+        .sort((a: Data, b: Data) => {
+          const dateA = new Date(a.projects[0].created_at).getTime();
+          const dateB = new Date(b.projects[0].created_at).getTime();
+          return dateB - dateA; // newest first
+        })
+        .slice(0, 6); // keep the 6 most recent records
 
-    setRecentJobNumber(sorted);
-  } else {
-    setRecentJobNumber([]);
-  }
-};
+      setRecentJobNumber(sorted);
+    } else {
+      setRecentJobNumber([]);
+    }
+  };
 
-  function getOperate(method : string) : string{
-    switch(method){
+  function getOperate(method: string): string {
+    switch (method) {
       case 'import':
-        return 'Nhập khẩu';
+        return 'Import';
       case 'export':
-        return 'Xuất khẩu';
+        return 'Export';
       default:
-        return 'Không xác định';
+        return 'Unknown';
     }
   }
 

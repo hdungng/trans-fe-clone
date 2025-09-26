@@ -45,7 +45,7 @@ export default function JobNumberBarChart({ slot }: JobNumberDateChartProps) {
     <BarChart
       hideLegend
       height={380}
-      series={[{ data, label: 'Số Job Number' }]}
+      series={[{ data, label: 'Job Numbers' }]}
       xAxis={[{ data: labels, scaleType: 'band', disableLine: true, disableTicks: true, tickLabelStyle: axisFonstyle }]}
       yAxis={[{ position: 'none' }]}
       slotProps={{ bar: { rx: 5, ry: 5 } }}
