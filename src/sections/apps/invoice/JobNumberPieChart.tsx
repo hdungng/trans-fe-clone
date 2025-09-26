@@ -19,6 +19,8 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import TaxCodeAutocomplete from 'components/common/TaxCodeAutocomplete';
 import { getClientDetail } from 'api/client';
 import { ClientType } from 'types/pages/client';
+import { useIntl } from 'react-intl';
+
 
 const STATUS_ORDER = ['new', 'ready', 'crosschecked', 'completed'] as const;
 type KnownStatusKey = typeof STATUS_ORDER[number];
@@ -34,6 +36,7 @@ export default function JobNumberPieChart() {
   const [userList, setUserList] = useState<UserType[]>();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [filterClient, setFilterClient] = useState<ClientType | null>(null);
+  const intl = useIntl();
 
   useEffect(() => {
     fetchData();
@@ -87,13 +90,35 @@ export default function JobNumberPieChart() {
 
   const statusConfig: Record<StatusKey, { label: string; color: string }> = useMemo(
     () => ({
-      new: { label: 'New', color: theme.palette.warning.main },
-      ready: { label: 'Ready', color: theme.palette.primary.main },
-      crosschecked: { label: 'Cross-checked', color: theme.palette.error.main },
-      completed: { label: 'Extracted', color: theme.palette.success.main },
-      unknown: { label: 'Unknown', color: theme.palette.grey[500] }
+      new: {
+        label: intl.formatMessage({ id: 'job-number.status.new', defaultMessage: 'New' }),
+        color: theme.palette.warning.main
+      },
+      ready: {
+        label: intl.formatMessage({ id: 'job-number.status.ready', defaultMessage: 'Ready' }),
+        color: theme.palette.primary.main
+      },
+      crosschecked: {
+        label: intl.formatMessage({ id: 'job-number.status.crosschecked', defaultMessage: 'Cross-checked' }),
+        color: theme.palette.error.main
+      },
+      completed: {
+        label: intl.formatMessage({ id: 'job-number.status.completed', defaultMessage: 'Extracted' }),
+        color: theme.palette.success.main
+      },
+      unknown: {
+        label: intl.formatMessage({ id: 'common.unknown', defaultMessage: 'Unknown' }),
+        color: theme.palette.grey[500]
+      }
     }),
-    [theme.palette.error.main, theme.palette.grey[500], theme.palette.primary.main, theme.palette.success.main, theme.palette.warning.main]
+    [
+      intl,
+      theme.palette.error.main,
+      theme.palette.grey[500],
+      theme.palette.primary.main,
+      theme.palette.success.main,
+      theme.palette.warning.main
+    ]
   );
 
   const normalizeStatusKey = (value?: string): KnownStatusKey | '' => {
@@ -178,16 +203,25 @@ export default function JobNumberPieChart() {
         <Grid container alignItems="center" spacing={1}>
           <Stack sx={{ alignItems: { xs: 'center', sm: 'flex-start' } }}>
             <Stack direction="row" sx={{ alignItems: 'center' }}>
-              <Typography variant="h5">Job Numbers by User</Typography>
+              <Typography variant="h5">
+                {intl.formatMessage({ id: 'dashboard.job-number-pie.title', defaultMessage: 'Job Numbers by User' })}
+              </Typography>
             </Stack>
           </Stack>
           <FormControl fullWidth sx={{ marginY: 3 }}>
-            <InputLabel id="user-select">Select User</InputLabel>
+            <InputLabel id="user-select">
+              {intl.formatMessage({ id: 'dashboard.job-number-pie.select-user', defaultMessage: 'Select User' })}
+            </InputLabel>
             <Select
               labelId="user-select"
               id="user-select"
               value={selectedUser ?? "all"}
               onChange={handleChange}
+              label={intl.formatMessage({ id: 'dashboard.job-number-pie.select-user', defaultMessage: 'Select User' })}
+            >
+              <MenuItem value="all">
+                {intl.formatMessage({ id: 'job-number.status.tabs.all', defaultMessage: 'All' })}
+              </MenuItem>
               label="Select User"
             >
               <MenuItem value="all">All</MenuItem>
@@ -202,7 +236,7 @@ export default function JobNumberPieChart() {
           <DatePicker
             format="dd/MM/yyyy"
             value={selectedDate}
-            label="Select Date"
+            label={intl.formatMessage({ id: 'common.select-date', defaultMessage: 'Select Date' })}
             onChange={handleDateChange}
             slotProps={{
               textField: {
@@ -258,7 +292,7 @@ export default function JobNumberPieChart() {
               <Grid sx={DotSize} size="grow">
                 <Dot color="warning" size={12} />
                 <Typography variant="subtitle1" color="text.secondary">
-                  New
+                  {statusConfig.new.label}
                 </Typography>
               </Grid>
               <Grid sx={ExpenseSize}>{chartData.find((item) => item.key === 'new')?.value ?? 0}</Grid>
@@ -270,7 +304,7 @@ export default function JobNumberPieChart() {
               <Grid sx={DotSize} size="grow">
                 <Dot color="primary" size={12} />
                 <Typography variant="subtitle1" color="text.secondary">
-                  Ready
+                  {statusConfig.ready.label}
                 </Typography>
               </Grid>
               <Grid sx={ExpenseSize}>{chartData.find((item) => item.key === 'ready')?.value ?? 0}</Grid>
@@ -282,7 +316,7 @@ export default function JobNumberPieChart() {
               <Grid sx={DotSize} size="grow">
                 <Dot color="error" size={12} />
                 <Typography variant="subtitle1" color="text.secondary">
-                  Cross-checked
+                  {statusConfig.crosschecked.label}
                 </Typography>
               </Grid>
               <Grid sx={ExpenseSize}>{chartData.find((item) => item.key === 'crosschecked')?.value ?? 0}</Grid>
@@ -294,7 +328,7 @@ export default function JobNumberPieChart() {
               <Grid sx={DotSize} size="grow">
                 <Dot color="success" size={12} />
                 <Typography variant="subtitle1" color="text.secondary">
-                  Extracted
+                  {statusConfig.completed.label}
                 </Typography>
               </Grid>
               <Grid sx={ExpenseSize}>{chartData.find((item) => item.key === 'completed')?.value ?? 0}</Grid>

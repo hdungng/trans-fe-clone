@@ -9,7 +9,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useIntl } from 'react-intl';
 
 // API + types
 import { APIResponse } from 'types/response';
@@ -69,15 +70,40 @@ function stableSort<T>(array: readonly T[], comparator: (a: T, b: T) => number) 
 interface HeadCell {
   disablePadding: boolean;
   id: keyof Data;
-  label: string;
+  labelId: string;
+  defaultMessage: string;
   align: 'center' | 'left' | 'right' | 'inherit' | 'justify' | undefined;
 }
 
 const headCells: readonly HeadCell[] = [
-  { id: 'name', align: 'left', disablePadding: false, label: 'Job Number' },
-  { id: 'company_name', align: 'left', disablePadding: true, label: 'Company' },
-  { id: 'method', align: 'right', disablePadding: false, label: 'Operation' },
-  { id: 'status', align: 'left', disablePadding: false, label: 'Status' }
+  {
+    id: 'name',
+    align: 'left',
+    disablePadding: false,
+    labelId: 'dashboard.recent-job-number.table.column.job-number',
+    defaultMessage: 'Job Number'
+  },
+  {
+    id: 'company_name',
+    align: 'left',
+    disablePadding: true,
+    labelId: 'dashboard.recent-job-number.table.column.company',
+    defaultMessage: 'Company'
+  },
+  {
+    id: 'method',
+    align: 'right',
+    disablePadding: false,
+    labelId: 'dashboard.recent-job-number.table.column.operation',
+    defaultMessage: 'Operation'
+  },
+  {
+    id: 'status',
+    align: 'left',
+    disablePadding: false,
+    labelId: 'dashboard.recent-job-number.table.column.status',
+    defaultMessage: 'Status'
+  }
 ];
 
 interface RecentJobNumberTableProps {
@@ -86,6 +112,8 @@ interface RecentJobNumberTableProps {
 }
 
 function RecentJobNumberTable({ order, orderBy }: RecentJobNumberTableProps) {
+  const intl = useIntl();
+
   return (
     <TableHead>
       <TableRow>
@@ -96,7 +124,7 @@ function RecentJobNumberTable({ order, orderBy }: RecentJobNumberTableProps) {
             padding={headCell.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
-            {headCell.label}
+            {intl.formatMessage({ id: headCell.labelId, defaultMessage: headCell.defaultMessage })}
           </TableCell>
         ))}
       </TableRow>
@@ -107,29 +135,30 @@ function RecentJobNumberTable({ order, orderBy }: RecentJobNumberTableProps) {
 // ==============================|| ORDER STATUS ||============================== //
 
 function OrderStatus({ status }: { status: string }) {
+  const intl = useIntl();
   let color: ColorProps;
   let title: string;
 
   switch (status) {
     case 'new':
       color = 'warning';
-      title = 'New';
+      title = intl.formatMessage({ id: 'job-number.status.new', defaultMessage: 'New' });
       break;
     case 'completed':
       color = 'success';
-      title = 'Extracted';
+      title = intl.formatMessage({ id: 'job-number.status.completed', defaultMessage: 'Extracted' });
       break;
     case 'crosschecked':
       color = 'error';
-      title = 'Cross-checked';
+      title = intl.formatMessage({ id: 'job-number.status.crosschecked', defaultMessage: 'Cross-checked' });
       break;
     case 'ready':
       color = 'primary';
-      title = 'Ready';
+      title = intl.formatMessage({ id: 'job-number.status.ready', defaultMessage: 'Ready' });
       break;
     default:
       color = 'primary';
-      title = 'Unknown';
+      title = intl.formatMessage({ id: 'common.unknown', defaultMessage: 'Unknown' });
   }
 
   return (
@@ -147,6 +176,7 @@ export default function OrderTable() {
   const orderBy: keyof Data = 'name';
 
   const [recentJobNumber, setRecentJobNumber] = useState<Data[]>([]);
+  const intl = useIntl();
 
   useEffect(() => {
     fetchData();
@@ -171,16 +201,18 @@ export default function OrderTable() {
     }
   };
 
-  function getOperate(method: string): string {
-    switch (method) {
-      case 'import':
-        return 'Import';
-      case 'export':
-        return 'Export';
-      default:
-        return 'Unknown';
-    }
-  }
+  const getOperate = useMemo(() => {
+    return (method: string): string => {
+      switch (method) {
+        case 'import':
+          return intl.formatMessage({ id: 'job-number.method.import', defaultMessage: 'Import' });
+        case 'export':
+          return intl.formatMessage({ id: 'job-number.method.export', defaultMessage: 'Export' });
+        default:
+          return intl.formatMessage({ id: 'common.unknown', defaultMessage: 'Unknown' });
+      }
+    };
+  }, [intl]);
 
   return (
     <Box>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useIntl } from 'react-intl';
 
 // material-ui
 import FormControl from '@mui/material/FormControl';
@@ -26,6 +27,7 @@ interface TablePaginationProps {
 
 export default function TablePagination({ getPageCount, setPageIndex, setPageSize, getState, initialPageSize, options = [10, 25, 50, 100] }: TablePaginationProps) {
   const [open, setOpen] = useState(false);
+  const intl = useIntl();
   if (initialPageSize) {
     options = [...options, initialPageSize]
       .filter((item, index) => [...options, initialPageSize].indexOf(item) === index)
@@ -62,7 +64,7 @@ export default function TablePagination({ getPageCount, setPageIndex, setPageSiz
         <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
           <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
             <Typography variant="caption" color="secondary">
-              Rows per page
+              {intl.formatMessage({ id: 'table.pagination.rows-per-page', defaultMessage: 'Rows per page' })}
             </Typography>
             <FormControl>
               <Select
@@ -84,7 +86,7 @@ export default function TablePagination({ getPageCount, setPageIndex, setPageSiz
             </FormControl>
           </Stack>
           <Typography variant="caption" color="secondary">
-            Go to
+            {intl.formatMessage({ id: 'table.pagination.go-to', defaultMessage: 'Go to' })}
           </Typography>
           <TextField
             size="small"
@@ -94,7 +96,8 @@ export default function TablePagination({ getPageCount, setPageIndex, setPageSiz
               const page = e.target.value ? Number(e.target.value) - 1 : 0;
               setPageIndex(page);
             }}
-            inputProps={{ 'aria-label': 'Go to page' }}
+            inputProps={{ 'aria-label': intl.formatMessage({ id: 'table.pagination.go-to-page', defaultMessage: 'Go to page' }) }}
+
             sx={{ '& .MuiOutlinedInput-input': { py: 0.75, px: 1.25, width: 36 } }}
           />
         </Stack>
