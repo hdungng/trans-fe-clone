@@ -20,6 +20,7 @@ import { useIntl } from 'react-intl';
 import {
     getClientCrossCheckGuidingAI,
     getClientDetail,
+    getDefaultSettingDocuments,
     updateClientCrossCheckGuidingAI
 } from 'api/client';
 import { APIResponse } from 'types/response';
@@ -49,6 +50,7 @@ import { Formik } from 'formik';
 import { mockFormImportDefault } from '../job-number/form/formik/ImportDefaultFormik';
 import { mockFormExportDefault } from '../job-number/form/formik/ExportDefaultFormik';
 import { useDefaultSetting } from '../default-setting/DefaultSettingContext';
+import { DefaultSettingDocument, useDefaultSettingPage } from '../default-setting/DefaultSettingPageContext';
 
 const TRASAS_TAX_CODE = '0304184415';
 
@@ -57,6 +59,9 @@ export default function GuideAIPage() {
     const { user } = useAuth();
 
     const { setDefaultSetting } = useDefaultSetting();
+    const { state: defaultSettingState, dispatch: defaultSettingDispatch } = useDefaultSettingPage();
+
+    const { documents, selectedDocument } = defaultSettingState;
 
     const [method, setMethod] = useState<'import' | 'export'>('import');
     const [filterClient, setFilterClient] = useState<ClientType | null>(null);
@@ -88,6 +93,94 @@ export default function GuideAIPage() {
             filterUserId: filterUserId ?? null,
         }));
     }, [filterClient, customsProcedureType, TRASASCustomerId, filterUserId, setDefaultSetting]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchDocuments = async () => {
+            defaultSettingDispatch({ type: 'SET_DOCUMENT_LIST_LOADING', payload: true });
+
+            try {
+                const res: APIResponse = await getDefaultSettingDocuments();
+
+                if (!isMounted) {
+                    return;
+                }
+
+                defaultSettingDispatch({
+                    type: 'SET_DOCUMENTS',
+                    payload: res?.status === 'success' ? (res.data as DefaultSettingDocument[]) || [] : []
+                });
+            } finally {
+                if (isMounted) {
+                    defaultSettingDispatch({ type: 'SET_DOCUMENT_LIST_LOADING', payload: false });
+                }
+            }
+        };
+
+        fetchDocuments();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [defaultSettingDispatch]);
+
+    useEffect(() => {
+        if (selectedDocument || documents.length === 0) {
+            return;
+        }
+
+        const defaultDocument = documents[0] ?? null;
+
+        defaultSettingDispatch({ type: 'SET_SELECTED_DOCUMENT', payload: defaultDocument });
+        defaultSettingDispatch({ type: 'SET_DOCUMENT_NAME', payload: defaultDocument?.name ?? '' });
+        defaultSettingDispatch({ type: 'SET_ACTIVE_STEP', payload: defaultDocument ? 1 : 0 });
+    }, [defaultSettingDispatch, documents, selectedDocument]);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const syncWithDocument = async () => {
+            if (!selectedDocument) {
+                return;
+            }
+
+            setMethod(selectedDocument.method as 'import' | 'export');
+            setTab(1);
+            setActiveTab('extract');
+            setCustomsProcedureType(selectedDocument.customs_procedure_type);
+            setTRASASCustomerId(selectedDocument.customer ?? undefined);
+            setFilterUserId(selectedDocument.user_id ?? undefined);
+
+            defaultSettingDispatch({ type: 'SET_ACTIVE_STEP', payload: 1 });
+
+            try {
+                const response: APIResponse = await getClientDetail(selectedDocument.tax_code);
+
+                if (!isMounted) {
+                    return;
+                }
+
+                if (response?.status === 'success') {
+                    setFilterClient(response.data);
+                } else {
+                    setFilterClient(null);
+                }
+            } catch (error) {
+                if (!isMounted) {
+                    return;
+                }
+
+                setFilterClient(null);
+            }
+        };
+
+        syncWithDocument();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [defaultSettingDispatch, selectedDocument]);
 
     const handleSelectClient = async (_: any, value: any) => {
         if (!value) {
