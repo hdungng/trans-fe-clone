@@ -5,6 +5,9 @@ import {
     Button,
     CardContent,
     CircularProgress,
+    Step,
+    StepLabel,
+    Stepper,
     FormControl,
     InputLabel,
     MenuItem,
@@ -61,7 +64,7 @@ export default function GuideAIPage() {
     const { setDefaultSetting } = useDefaultSetting();
     const { state: defaultSettingState, dispatch: defaultSettingDispatch } = useDefaultSettingPage();
 
-    const { documents, selectedDocument } = defaultSettingState;
+    const { documents, selectedDocument, activeStep, documentListLoading } = defaultSettingState;
 
     const [method, setMethod] = useState<'import' | 'export'>('import');
     const [filterClient, setFilterClient] = useState<ClientType | null>(null);
@@ -124,18 +127,6 @@ export default function GuideAIPage() {
             isMounted = false;
         };
     }, [defaultSettingDispatch]);
-
-    useEffect(() => {
-        if (selectedDocument || documents.length === 0) {
-            return;
-        }
-
-        const defaultDocument = documents[0] ?? null;
-
-        defaultSettingDispatch({ type: 'SET_SELECTED_DOCUMENT', payload: defaultDocument });
-        defaultSettingDispatch({ type: 'SET_DOCUMENT_NAME', payload: defaultDocument?.name ?? '' });
-        defaultSettingDispatch({ type: 'SET_ACTIVE_STEP', payload: defaultDocument ? 1 : 0 });
-    }, [defaultSettingDispatch, documents, selectedDocument]);
 
     useEffect(() => {
         let isMounted = true;
@@ -221,6 +212,35 @@ export default function GuideAIPage() {
         }
 
         setTRASASCustomerId(value);
+    };
+
+    const handleSelectDefaultDocument = (event: any) => {
+        const docId = event.target.value;
+
+        if (!docId) {
+            defaultSettingDispatch({ type: 'SET_SELECTED_DOCUMENT', payload: null });
+            defaultSettingDispatch({ type: 'SET_DOCUMENT_NAME', payload: '' });
+            defaultSettingDispatch({ type: 'SET_ACTIVE_STEP', payload: 0 });
+            setFilterClient(null);
+            setTRASASCustomerId(undefined);
+            setFilterUserId(undefined);
+            return;
+        }
+
+        const found = documents.find((doc) => doc.id === Number(docId)) || null;
+
+        defaultSettingDispatch({ type: 'SET_SELECTED_DOCUMENT', payload: found });
+        defaultSettingDispatch({ type: 'SET_DOCUMENT_NAME', payload: found?.name ?? '' });
+    };
+
+    const handleMoveToInputTab = () => {
+        if (!selectedDocument) {
+            return;
+        }
+
+        defaultSettingDispatch({ type: 'SET_ACTIVE_STEP', payload: 1 });
+        setActiveTab('extract');
+        setTab(1);
     };
 
     const handleMethodChange = (value: 'import' | 'export') => {
@@ -357,6 +377,110 @@ export default function GuideAIPage() {
     return (
         <MainCard content={false} sx={{ mt: 5 }}>
             <CardContent sx={{ p: 3 }}>
+                <MainCard sx={{ mb: 3 }}>
+                    <Typography variant='h5' sx={{ mb: 3 }}>
+                        {intl.formatMessage({
+                            id: 'guide-ai.default-setting.section',
+                            defaultMessage: 'Default Setting'
+                        })}
+                    </Typography>
+
+                    <Stepper activeStep={activeStep} sx={{ mb: 3 }}>
+                        <Step>
+                            <StepLabel>
+                                {intl.formatMessage({
+                                    id: 'guide-ai.default-setting.step.select',
+                                    defaultMessage: 'Bước 1: Chọn Default Setting document'
+                                })}
+                            </StepLabel>
+                        </Step>
+                        <Step>
+                            <StepLabel>
+                                {intl.formatMessage({
+                                    id: 'guide-ai.default-setting.step.input',
+                                    defaultMessage: 'Bước 2: Chuyển về màn hình nhập liệu'
+                                })}
+                            </StepLabel>
+                        </Step>
+                    </Stepper>
+
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        gap={2}
+                        alignItems={{ xs: 'stretch', sm: 'center' }}
+                    >
+                        <FormControl
+                            sx={{ width: { xs: '100%', sm: 360 } }}
+                            disabled={documentListLoading || documents.length === 0}
+                        >
+                            <InputLabel id="guide-ai-default-setting-document-select">
+                                {intl.formatMessage({
+                                    id: 'guide-ai.default-setting.document',
+                                    defaultMessage: 'Default Setting document'
+                                })}
+                            </InputLabel>
+                            <Select
+                                labelId="guide-ai-default-setting-document-select"
+                                value={selectedDocument?.id ?? ''}
+                                label={intl.formatMessage({
+                                    id: 'guide-ai.default-setting.document',
+                                    defaultMessage: 'Default Setting document'
+                                })}
+                                onChange={handleSelectDefaultDocument}
+                                displayEmpty
+                                slotProps={{
+                                    input: {
+                                        'aria-label': intl.formatMessage({
+                                            id: 'guide-ai.default-setting.document.aria',
+                                            defaultMessage: 'Select Default Setting document'
+                                        })
+                                    }
+                                }}
+                            >
+                                <MenuItem value=''>
+                                    {documentListLoading
+                                        ? intl.formatMessage({
+                                            id: 'guide-ai.default-setting.loading',
+                                            defaultMessage: 'Đang tải hồ sơ...'
+                                        })
+                                        : intl.formatMessage({
+                                            id: 'guide-ai.default-setting.placeholder',
+                                            defaultMessage: 'Chọn hồ sơ mặc định'
+                                        })}
+                                </MenuItem>
+
+                                {documents.map((doc) => (
+                                    <MenuItem key={doc.id} value={doc.id}>
+                                        {doc.name || `#${doc.id}`}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+                        <Stack direction='row' justifyContent='flex-end' sx={{ width: { xs: '100%', sm: 'auto' } }}>
+                            <Button
+                                variant='contained'
+                                onClick={handleMoveToInputTab}
+                                disabled={!selectedDocument}
+                            >
+                                {intl.formatMessage({
+                                    id: 'guide-ai.default-setting.go-to-input',
+                                    defaultMessage: 'Đi tới màn hình nhập liệu'
+                                })}
+                            </Button>
+                        </Stack>
+                    </Stack>
+
+                    {documents.length === 0 && !documentListLoading && (
+                        <Typography variant='body2' color='text.secondary' sx={{ mt: 2 }}>
+                            {intl.formatMessage({
+                                id: 'guide-ai.default-setting.empty',
+                                defaultMessage: 'Chưa có hồ sơ mặc định nào, hãy tạo tại màn hình Default Setting.'
+                            })}
+                        </Typography>
+                    )}
+                </MainCard>
+
                 <MainCard sx={{ mb: 3 }}>
                     <Typography variant='h5' sx={{ mb: 5 }}>
                         {intl.formatMessage({ id: 'default-setting.section.input-info', defaultMessage: 'Enter information' })}
