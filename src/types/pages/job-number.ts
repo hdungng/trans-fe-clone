@@ -34,6 +34,10 @@ export interface JobNumber {
     extracted_ms: number,
 }
 
+export interface DeclarationSetting {
+    default_setting_document_id: number | '';
+}
+
 export interface InitForm {
     jobNumber: string;
     taxCode: string;
@@ -42,6 +46,8 @@ export interface InitForm {
     note: string;
     customs_procedure_type: string;
     ignore_masterlist  : boolean;
+    declarations_count: number;
+    declaration_settings: DeclarationSetting[];
 }
 
 

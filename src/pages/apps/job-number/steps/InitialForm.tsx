@@ -11,7 +11,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useFormik } from 'formik';
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import * as yup from 'yup';
-import { getClientDetail } from 'api/client';
+import { getClientDetail, getDefaultSettingDocuments } from 'api/client';
 import TaxCodeAutocomplete from 'components/common/TaxCodeAutocomplete';
 import { InitForm, InitialFormProps } from 'types/pages/job-number';
 import { ClientType } from 'types/pages/client';
@@ -25,6 +25,14 @@ import { useIntl } from 'react-intl';
 
 
 const TRASAS_TAX_CODE = '0304184415';
+
+const DEFAULT_DECLARATION_SETTING = { default_setting_document_id: '' };
+
+const normalizeDeclarationSettings = (count: number, settings?: InitForm['declaration_settings']) => {
+    const total = Math.max(1, Number.isNaN(count) ? 1 : count);
+
+    return Array.from({ length: total }, (_, index) => settings?.[index] ?? { ...DEFAULT_DECLARATION_SETTING });
+};
 
 const createValidationSchema = (intl: ReturnType<typeof useIntl>) =>
     yup.object({
@@ -51,6 +59,26 @@ const createValidationSchema = (intl: ReturnType<typeof useIntl>) =>
             .string()
             .required(intl.formatMessage({ id: 'job-number.edit.initial.validation.customs-procedure', defaultMessage: 'Customs procedure type is required' })),
         note: yup.string().nullable(),
+        declarations_count: yup
+            .number()
+            .typeError(intl.formatMessage({ id: 'job-number.edit.initial.validation.declarations-count', defaultMessage: 'Number of declarations is required' }))
+            .required(intl.formatMessage({ id: 'job-number.edit.initial.validation.declarations-count', defaultMessage: 'Number of declarations is required' }))
+            .min(1, intl.formatMessage({ id: 'job-number.edit.initial.validation.declarations-count-min', defaultMessage: 'At least one declaration is required' })),
+        declaration_settings: yup
+            .array()
+            .of(
+                yup.object({
+                    default_setting_document_id: yup
+                        .number()
+                        .typeError(intl.formatMessage({ id: 'job-number.edit.initial.validation.declaration-default-setting', defaultMessage: 'Defaulting Setting document is required' }))
+                        .required(intl.formatMessage({ id: 'job-number.edit.initial.validation.declaration-default-setting', defaultMessage: 'Defaulting Setting document is required' })),
+                })
+            )
+            .when('declarations_count', (count: number, schema: any) =>
+                schema
+                    .min(count || 0, intl.formatMessage({ id: 'job-number.edit.initial.validation.declaration-default-setting', defaultMessage: 'Defaulting Setting document is required' }))
+                    .max(count || 0, intl.formatMessage({ id: 'job-number.edit.initial.validation.declaration-default-setting', defaultMessage: 'Defaulting Setting document is required' }))
+            ),
     });
 
 const InitialForm = forwardRef(({ initialFormValues, setInitialFormData, mode, setJobNumberId, jobNumberId, }: InitialFormProps, ref) => {
@@ -59,7 +87,12 @@ const InitialForm = forwardRef(({ initialFormValues, setInitialFormData, mode, s
 
     // const [loading, setLoading] = useState(false);
     const [selectedClient, setSelectedClient] = useState<ClientType | null>(null);
-    const [isNext, setIsNext] = useState<Boolean>()
+    const [isNext, setIsNext] = useState<Boolean>();
+    const [defaultSettingDocuments, setDefaultSettingDocuments] = useState<any[]>([]);
+    const [isFetchingDefaultSetting, setIsFetchingDefaultSetting] = useState<boolean>(false);
+
+    const initialDeclarationsCount = initialFormValues?.declarations_count ?? 1;
+    const initialDeclarationSettings = normalizeDeclarationSettings(initialDeclarationsCount, initialFormValues?.declaration_settings);
 
     const formik = useFormik<InitForm>({
         initialValues: {
@@ -70,6 +103,8 @@ const InitialForm = forwardRef(({ initialFormValues, setInitialFormData, mode, s
             note: initialFormValues?.note ?? '',
             customs_procedure_type: initialFormValues?.customs_procedure_type ?? '',
             ignore_masterlist: initialFormValues?.ignore_masterlist ?? false,
+            declarations_count: initialDeclarationsCount,
+            declaration_settings: initialDeclarationSettings,
         },
         validationSchema,
         onSubmit: async (values) => {
@@ -79,7 +114,9 @@ const InitialForm = forwardRef(({ initialFormValues, setInitialFormData, mode, s
                 method: values.method,
                 customer: values?.customer,
                 note: values.note,
-                customs_procedure_type: values?.customs_procedure_type
+                customs_procedure_type: values?.customs_procedure_type,
+                declarations_count: values.declarations_count,
+                declaration_settings: values.declaration_settings,
             });
 
             const payload = values.taxCode === TRASAS_TAX_CODE
@@ -162,11 +199,55 @@ const InitialForm = forwardRef(({ initialFormValues, setInitialFormData, mode, s
 
     useEffect(() => {
         if (initialFormValues) {
-            formik.setValues(initialFormValues);
+            const declarationsCount = initialFormValues.declarations_count ?? formik.values.declarations_count ?? 1;
+            const normalizedDeclarationSettings = normalizeDeclarationSettings(
+                declarationsCount,
+                initialFormValues.declaration_settings
+            );
+
+            formik.setValues({
+                ...initialFormValues,
+                note: initialFormValues.note ?? '',
+                declarations_count: declarationsCount,
+                declaration_settings: normalizedDeclarationSettings,
+            });
             handleSelect(null, initialFormValues.taxCode);
         }
 
     }, [initialFormValues]);
+
+    useEffect(() => {
+        const { taxCode, method, customs_procedure_type, customer } = formik.values;
+
+        if (!taxCode || !method || customs_procedure_type === '') {
+            setDefaultSettingDocuments([]);
+            return;
+        }
+
+        const fetchDefaultSettingDocuments = async () => {
+            setIsFetchingDefaultSetting(true);
+            try {
+                const response: APIResponse = await getDefaultSettingDocuments({
+                    tax_code: taxCode,
+                    method,
+                    customs_procedure_type: Number(customs_procedure_type),
+                    customer: taxCode === TRASAS_TAX_CODE ? (customer ? String(customer) : null) : null,
+                });
+
+                if (response?.status === 'success') {
+                    setDefaultSettingDocuments(response.data || []);
+                } else {
+                    setDefaultSettingDocuments([]);
+                }
+            } catch (error) {
+                setDefaultSettingDocuments([]);
+            } finally {
+                setIsFetchingDefaultSetting(false);
+            }
+        };
+
+        fetchDefaultSettingDocuments();
+    }, [formik.values.taxCode, formik.values.method, formik.values.customs_procedure_type, formik.values.customer]);
 
     useImperativeHandle(ref, () => ({
         submitForm: async () => {
@@ -177,7 +258,9 @@ const InitialForm = forwardRef(({ initialFormValues, setInitialFormData, mode, s
                     jobNumber: true,
                     taxCode: true,
                     method: true,
-                    customer: true
+                    customer: true,
+                    declarations_count: true,
+                    declaration_settings: formik.values.declaration_settings.map(() => ({ default_setting_document_id: true })),
                 });
                 return false;
             }
@@ -208,7 +291,13 @@ const InitialForm = forwardRef(({ initialFormValues, setInitialFormData, mode, s
             return formik.values;
         },
         setValues: (values: InitForm) => {
-            formik.setValues(values);
+            const declarationsCount = values?.declarations_count ?? formik.values.declarations_count ?? 1;
+            formik.setValues({
+                ...values,
+                note: values?.note ?? '',
+                declarations_count: declarationsCount,
+                declaration_settings: normalizeDeclarationSettings(declarationsCount, values?.declaration_settings),
+            });
         },
         isValid: async () => {
 
@@ -220,7 +309,9 @@ const InitialForm = forwardRef(({ initialFormValues, setInitialFormData, mode, s
                     taxCode: true,
                     method: true,
                     customer: true,
-                    note: true
+                    note: true,
+                    declarations_count: true,
+                    declaration_settings: formik.values.declaration_settings.map(() => ({ default_setting_document_id: true })),
                 });
                 return false;
             }
@@ -246,6 +337,21 @@ const InitialForm = forwardRef(({ initialFormValues, setInitialFormData, mode, s
             console.error('Error fetching selected item data:', error);
             setSelectedClient(null);
         }
+    };
+
+    const handleDeclarationsCountChange = (event: any) => {
+        const value = Number(event.target.value);
+        const normalizedCount = Number.isNaN(value) ? 1 : Math.max(1, Math.floor(value));
+        const normalizedSettings = normalizeDeclarationSettings(normalizedCount, formik.values.declaration_settings);
+
+        formik.setFieldValue('declarations_count', normalizedCount);
+        formik.setFieldValue('declaration_settings', normalizedSettings);
+    };
+
+    const handleDeclarationSettingChange = (index: number, value: number | '') => {
+        const updated = [...formik.values.declaration_settings];
+        updated[index] = { default_setting_document_id: value === '' ? '' : Number(value) };
+        formik.setFieldValue('declaration_settings', updated);
     };
 
     return (
@@ -378,6 +484,88 @@ const InitialForm = forwardRef(({ initialFormValues, setInitialFormData, mode, s
                                 </FormControl>
                             </Stack>
                         </Grid>
+
+                        <Grid sx={{ mb: 2 }}>
+                            <Stack sx={{ gap: 1 }}>
+                                <InputLabel required={true}>{intl.formatMessage({ id: 'job-number.edit.initial.field.declarations-count', defaultMessage: 'Number of declarations' })}</InputLabel>
+                                <TextField
+                                    id="declarations_count"
+                                    name="declarations_count"
+                                    type="number"
+                                    fullWidth
+                                    inputProps={{ min: 1 }}
+                                    value={formik.values.declarations_count}
+                                    onChange={handleDeclarationsCountChange}
+                                    onBlur={formik.handleBlur}
+                                    error={formik.touched.declarations_count && Boolean(formik.errors.declarations_count)}
+                                    helperText={formik.touched.declarations_count && formik.errors.declarations_count}
+                                />
+                            </Stack>
+                        </Grid>
+
+                        {formik.values.declaration_settings.map((declaration, index) => {
+                            const declarationError = (formik.errors.declaration_settings as any)?.[index]?.default_setting_document_id;
+                            const declarationTouched = (formik.touched.declaration_settings as any)?.[index]?.default_setting_document_id;
+
+                            return (
+                                <Grid sx={{ mb: 2 }} key={`declaration-default-setting-${index}`}>
+                                    <Stack sx={{ gap: 1 }}>
+                                        <InputLabel required={true}>
+                                            {intl.formatMessage(
+                                                {
+                                                    id: 'job-number.edit.initial.field.declaration-default-setting',
+                                                    defaultMessage: 'Defaulting Setting document for declaration {index}',
+                                                },
+                                                { index: index + 1 }
+                                            )}
+                                        </InputLabel>
+                                        <FormControl>
+                                            <Select
+                                                name={`declaration_settings[${index}].default_setting_document_id`}
+                                                value={declaration.default_setting_document_id ?? ''}
+                                                onChange={(event) => handleDeclarationSettingChange(index, event.target.value as number | '')}
+                                                onBlur={formik.handleBlur}
+                                                error={Boolean(declarationTouched && declarationError)}
+                                                displayEmpty
+                                                slotProps={{
+                                                    input: {
+                                                        'aria-label': intl.formatMessage(
+                                                            {
+                                                                id: 'job-number.edit.initial.field.declaration-default-setting',
+                                                                defaultMessage: 'Defaulting Setting document for declaration {index}',
+                                                            },
+                                                            { index: index + 1 }
+                                                        ),
+                                                    },
+                                                }}
+                                            >
+                                                <MenuItem value="" sx={{ color: 'text.secondary' }} disabled={isFetchingDefaultSetting || defaultSettingDocuments.length === 0}>
+                                                    {isFetchingDefaultSetting
+                                                        ? intl.formatMessage({ id: 'job-number.edit.initial.field.declaration-default-setting.loading', defaultMessage: 'Loading Defaulting Setting documents…' })
+                                                        : intl.formatMessage({ id: 'job-number.edit.initial.field.declaration-default-setting.placeholder', defaultMessage: 'Select a Defaulting Setting document' })}
+                                                </MenuItem>
+                                                {defaultSettingDocuments.map((doc: any) => (
+                                                    <MenuItem key={doc.id} value={doc.id}>
+                                                        {doc.name}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                            {declarationTouched && declarationError && (
+                                                <FormHelperText error>{declarationError as string}</FormHelperText>
+                                            )}
+                                            {!isFetchingDefaultSetting && defaultSettingDocuments.length === 0 && (
+                                                <FormHelperText>
+                                                    {intl.formatMessage({
+                                                        id: 'job-number.edit.initial.field.declaration-default-setting.empty',
+                                                        defaultMessage: 'No Defaulting Setting documents available',
+                                                    })}
+                                                </FormHelperText>
+                                            )}
+                                        </FormControl>
+                                    </Stack>
+                                </Grid>
+                            );
+                        })}
 
                         <Grid sx={{ mb: 2 }}>
                             <FormControlLabel
