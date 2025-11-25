@@ -1,0 +1,46 @@
+import { Link, useSearchParams } from 'react-router-dom';
+import { useIntl } from 'react-intl';
+
+// material-ui
+import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+
+// project imports
+import useAuth from 'hooks/useAuth';
+import AuthWrapper from 'sections/auth/AuthWrapper';
+import AuthLogin from 'sections/auth/jwt/AuthLogin';
+
+// ================================|| JWT - LOGIN ||================================ //
+
+export default function Login() {
+  const { isLoggedIn } = useAuth();
+  const intl = useIntl();
+
+  const [searchParams] = useSearchParams();
+  const auth = searchParams.get('auth');
+
+  return (
+    <AuthWrapper>
+      <Grid container spacing={3}>
+        <Grid size={12}>
+          <Stack direction="row" sx={{ alignItems: 'baseline', justifyContent: 'space-between', mb: { xs: -0.5, sm: 0.5 } }}>
+            <Typography variant="h3">{intl.formatMessage({ id: 'auth.login.title' })}</Typography>
+            <Typography
+              component={Link}
+              to={isLoggedIn ? '/auth/register' : auth ? `/${auth}/register?auth=jwt` : '/register'}
+              variant="body1"
+              sx={{ textDecoration: 'none' }}
+              color="primary"
+            >
+              {intl.formatMessage({ id: 'auth.login.no-account' })}
+            </Typography>
+          </Stack>
+        </Grid>
+        <Grid size={12}>
+          <AuthLogin isDemo={isLoggedIn} />
+        </Grid>
+      </Grid>
+    </AuthWrapper>
+  );
+}
