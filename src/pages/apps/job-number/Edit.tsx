@@ -26,7 +26,16 @@ import { handleStep1, handleStep2, reloadStep1, reloadStep2 } from './services/j
 import { useIntl } from 'react-intl';
 // import { Checkbox } from '@mui/material';
 
-let initialValue: InitForm = { jobNumber: '', taxCode: '', method: '', note: '', customs_procedure_type: '0', ignore_masterlist: false };
+let initialValue: InitForm = {
+    jobNumber: '',
+    taxCode: '',
+    method: '',
+    note: '',
+    customs_procedure_type: '0',
+    ignore_masterlist: false,
+    declarations_count: 1,
+    declaration_settings: [{ default_setting_document_id: '' }],
+};
 
 let initialUploadFileValue: UploadFileForm = { files: null, };
 
