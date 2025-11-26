@@ -1,6 +1,9 @@
 import { ClientFormData } from 'types/pages/client';
 import axios from 'utils/axios';
 import { ImportDefaultResponse, ExportDefaultResponse } from 'types/pages/form-field';
+import { mockFormImportDefault } from 'pages/apps/job-number/form/formik/ImportDefaultFormik';
+import { mockFormExportDefault } from 'pages/apps/job-number/form/formik/ExportDefaultFormik';
+import { APIResponse } from 'types/response';
 const TRASAS_TAX_CODE = '0304184415';
 
 
@@ -107,28 +110,123 @@ export interface DefaultSettingDocumentPayload {
     data: ImportDefaultResponse | ExportDefaultResponse | any;
 }
 
+type DefaultSettingDocumentRecord = DefaultSettingDocumentPayload & { id: number };
+
+const mockDefaultSettingDocuments: DefaultSettingDocumentRecord[] = [
+    {
+        id: 1,
+        name: 'Import default sample',
+        method: 'import',
+        tax_code: '0102030405',
+        customs_procedure_type: 0,
+        customer: null,
+        user_id: null,
+        import_type_code: 'A11',
+        data: mockFormImportDefault,
+    },
+    {
+        id: 2,
+        name: 'Export default sample',
+        method: 'export',
+        tax_code: '9988776655',
+        customs_procedure_type: 0,
+        customer: null,
+        user_id: null,
+        data: mockFormExportDefault,
+    },
+];
+
 export async function getDefaultSettingDocuments(params?: { tax_code?: string; method?: string; customs_procedure_type?: number; customer?: string | null; user_id?: number | null; }) {
-    try {
-        const response = await axios.get('/api/default-setting-document', { params });
-        return response.data;
-    } catch (error) {
-        return error;
+    let data = [...mockDefaultSettingDocuments];
+
+    if (params) {
+        data = data.filter((doc) => {
+            const taxCodeMatch = params.tax_code ? doc.tax_code === params.tax_code : true;
+            const methodMatch = params.method ? doc.method === params.method : true;
+            const customsProcedureMatch =
+                typeof params.customs_procedure_type === 'number'
+                    ? doc.customs_procedure_type === params.customs_procedure_type
+                    : true;
+            const customerMatch = params.customer ? doc.customer === params.customer : true;
+            const userMatch = typeof params.user_id === 'number' ? doc.user_id === params.user_id : true;
+
+            return taxCodeMatch && methodMatch && customsProcedureMatch && customerMatch && userMatch;
+        });
     }
+
+    const response: APIResponse = {
+        status: 'success',
+        message: 'Mocked default setting documents',
+        data,
+    };
+
+    return Promise.resolve(response);
 }
 
 export async function createDefaultSettingDocument(payload: DefaultSettingDocumentPayload) {
-    const response = await axios.post('/api/default-setting-document', payload);
-    return response.data;
+    const newDocument: DefaultSettingDocumentRecord = {
+        ...payload,
+        id: mockDefaultSettingDocuments[mockDefaultSettingDocuments.length - 1]?.id + 1 || 1,
+    };
+
+    mockDefaultSettingDocuments.push(newDocument);
+
+    const response: APIResponse = {
+        status: 'success',
+        message: 'Mocked document created',
+        data: newDocument,
+    };
+
+    return Promise.resolve(response);
 }
 
 export async function updateDefaultSettingDocument(id: number, payload: DefaultSettingDocumentPayload) {
-    const response = await axios.put(`/api/default-setting-document/${id}`, payload);
-    return response.data;
+    const index = mockDefaultSettingDocuments.findIndex((doc) => doc.id === id);
+
+    if (index === -1) {
+        const errorResponse: APIResponse = {
+            status: 'error',
+            message: 'Document not found',
+            data: null,
+        };
+
+        return Promise.resolve(errorResponse);
+    }
+
+    const updatedDocument: DefaultSettingDocumentRecord = { ...mockDefaultSettingDocuments[index], ...payload, id };
+    mockDefaultSettingDocuments[index] = updatedDocument;
+
+    const response: APIResponse = {
+        status: 'success',
+        message: 'Mocked document updated',
+        data: updatedDocument,
+    };
+
+    return Promise.resolve(response);
 }
 
 export async function deleteDefaultSettingDocument(id: number) {
-    const response = await axios.delete(`/api/default-setting-document/${id}`);
-    return response.data;
+    const index = mockDefaultSettingDocuments.findIndex((doc) => doc.id === id);
+
+    if (index === -1) {
+        const errorResponse: APIResponse = {
+            status: 'error',
+            message: 'Document not found',
+            data: null,
+        };
+
+        return Promise.resolve(errorResponse);
+    }
+
+    const [deletedDocument] = mockDefaultSettingDocuments.splice(index, 1);
+
+    const response: APIResponse = {
+        status: 'success',
+        message: 'Mocked document deleted',
+        data: deletedDocument,
+    };
+
+    return Promise.resolve(response);
 }
 
 
