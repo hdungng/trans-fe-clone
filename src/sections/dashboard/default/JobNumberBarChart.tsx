@@ -9,11 +9,12 @@ import { APIResponse } from 'types/response';
 
 interface JobNumberDateChartProps {
   slot: 'week' | 'month';
+  selectedUser?: string | number;
 }
 
 // ==============================|| MONTHLY BAR CHART ||============================== //
 
-export default function JobNumberBarChart({ slot }: JobNumberDateChartProps) {
+export default function JobNumberBarChart({ slot, selectedUser }: JobNumberDateChartProps) {
   const theme = useTheme();
   const intl = useIntl();
   const axisFonstyle = { fontSize: 10, fill: theme.palette.text.secondary };
@@ -96,12 +97,12 @@ export default function JobNumberBarChart({ slot }: JobNumberDateChartProps) {
 
   useEffect(() => {
     fetchData();
-  }, [slot]);
+  }, [selectedUser, slot]);
 
 
   const fetchData = async () => {
     // API Extract
-    const totalJobNumberDateResponse: APIResponse = await getJobNumberByDate();
+    const totalJobNumberDateResponse: APIResponse = await getJobNumberByDate(selectedUser);
 
     if (totalJobNumberDateResponse.status === 'success')
       switch (slot) {

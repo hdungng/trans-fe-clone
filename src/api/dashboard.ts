@@ -37,18 +37,30 @@ export async function getCurrentJobNumberByStatus(selectedUser?: any, selectedDa
     }
 }
 
-export async function getJobNumberByDate() {
+export async function getJobNumberByDate(selectedUser?: string | number) {
     try {
-        const response = await axios.get('/api/dashboard/project-by-date');
+        const params: Record<string, string | number> = {};
+
+        if (selectedUser && selectedUser !== 'all') {
+            params.user_id = selectedUser;
+        }
+
+        const response = await axios.get('/api/dashboard/project-by-date', { params });
         return response.data;
     } catch (error) {
         return error;
     }
 }
 
-export async function getJobNumberRecent() {
+export async function getJobNumberRecent(selectedUser?: string | number) {
     try {
-        const response = await axios.get('/api/projects');
+        const params: Record<string, string | number> = {};
+
+        if (selectedUser && selectedUser !== 'all') {
+            params.user_id = selectedUser;
+        }
+
+        const response = await axios.get('/api/projects', { params });
         return response.data;
     } catch (error) {
         return error;

@@ -9,6 +9,10 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import { useEffect, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 
@@ -19,6 +23,8 @@ import { getJobNumberRecent } from 'api/dashboard';
 // project imports
 import Dot from 'components/@extended/Dot';
 import { ColorProps } from 'types/extended';
+import { getUsersWithJobNumber } from 'api/user';
+import { UserType } from 'types/pages/user';
 
 // types
 interface Data {
@@ -176,14 +182,21 @@ export default function OrderTable() {
   const orderBy: keyof Data = 'name';
 
   const [recentJobNumber, setRecentJobNumber] = useState<Data[]>([]);
+  const [selectedUser, setSelectedUser] = useState<string | number>('all');
+  const [userList, setUserList] = useState<UserType[]>([]);
   const intl = useIntl();
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedUser]);
 
   const fetchData = async () => {
-    const res: APIResponse = await getJobNumberRecent();
+    const userListRes: APIResponse = await getUsersWithJobNumber();
+
+    if (userListRes.status === 'success') setUserList(userListRes.data);
+    else setUserList([]);
+
+    const res: APIResponse = await getJobNumberRecent(selectedUser);
 
     if (res.status === 'success' && Array.isArray(res.data)) {
       const sorted = res.data
@@ -201,6 +214,10 @@ export default function OrderTable() {
     }
   };
 
+  const handleChange = (event: any) => {
+    setSelectedUser(event.target.value);
+  };
+
   const getOperate = useMemo(() => {
     return (method: string): string => {
       switch (method) {
@@ -216,6 +233,27 @@ export default function OrderTable() {
 
   return (
     <Box>
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel id="user-select">
+          {intl.formatMessage({ id: 'dashboard.job-number-pie.select-user', defaultMessage: 'Select User' })}
+        </InputLabel>
+        <Select
+          labelId="user-select"
+          id="user-select"
+          value={selectedUser ?? 'all'}
+          onChange={handleChange}
+          label="Chọn User"
+        >
+          <MenuItem value="all">
+            {intl.formatMessage({ id: 'job-number.status.tabs.all', defaultMessage: 'All' })}
+          </MenuItem>
+          {(userList ?? []).map((user: UserType) => (
+            <MenuItem key={user.id} value={user.id}>
+              {user.full_name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       <TableContainer
         sx={{
           width: '100%',
