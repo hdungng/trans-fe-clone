@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useIntl } from 'react-intl';
 
 // material-ui
@@ -19,14 +19,15 @@ import MenuItem from '@mui/material/MenuItem';
 import MainCard from 'components/MainCard';
 import { getWeekOfMonth } from 'utils/formatDate';
 import JobNumberBarChart from '../default/JobNumberBarChart';
-import { getUsersWithJobNumber } from 'api/user';
-import { APIResponse } from 'types/response';
 import { UserType } from 'types/pages/user';
 
-export default function JobOverviewCreateChart() {
+interface JobOverviewCreateChartProps {
+  userList?: UserType[];
+}
+
+export default function JobOverviewCreateChart({ userList = [] }: JobOverviewCreateChartProps) {
   const [slot, setSlot] = useState<'month' | 'week'>('week');
   const [selectedUser, setSelectedUser] = useState<string | number>('all');
-  const [userList, setUserList] = useState<UserType[]>([]);
   const currentDate = new Date();
   const intl = useIntl();
   // const handleQuantity = (e: SelectChangeEvent) => {
@@ -35,17 +36,6 @@ export default function JobOverviewCreateChart() {
 
   const handleSlotChange = (event: React.MouseEvent<HTMLElement>, newAlignment: 'month' | 'week') => {
     if (newAlignment) setSlot(newAlignment);
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    const userListRes: APIResponse = await getUsersWithJobNumber();
-
-    if (userListRes.status === 'success') setUserList(userListRes.data);
-    else setUserList([]);
   };
 
   const handleChange = (event: any) => {

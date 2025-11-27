@@ -13,7 +13,6 @@ import { useEffect, useState } from 'react';
 import { APIResponse } from 'types/response';
 import { getCurrentJobNumberByStatus } from 'api/dashboard';
 import { InputLabel } from '@mui/material';
-import { getUsersWithJobNumber } from 'api/user';
 import { UserType } from 'types/pages/user';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import TaxCodeAutocomplete from 'components/common/TaxCodeAutocomplete';
@@ -22,11 +21,14 @@ import { ClientType } from 'types/pages/client';
 import { useIntl } from 'react-intl';
 // ==============================|| INVOICE - PIE CHART ||============================== //
 
-export default function JobNumberPieChart() {
+interface JobNumberPieChartProps {
+  userList?: UserType[];
+}
+
+export default function JobNumberPieChart({ userList = [] }: JobNumberPieChartProps) {
   const theme = useTheme();
   const [totalJobNumber, setTotalJobNumber] = useState<any>(null);
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
-  const [userList, setUserList] = useState<UserType[]>();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [filterClient, setFilterClient] = useState<ClientType | null>(null);
   const intl = useIntl();
@@ -61,14 +63,6 @@ export default function JobNumberPieChart() {
 
   const fetchData = async () => {
     // API Extract
-
-    const userListRes: any = await getUsersWithJobNumber();
-
-    if (userListRes.status === 'success')
-      setUserList(userListRes.data)
-    else
-      setUserList([]);
-
     const totalJobNumberResponse: APIResponse = await getCurrentJobNumberByStatus(selectedUser, selectedDate, filterClient);
 
     if (totalJobNumberResponse.status === 'success')

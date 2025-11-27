@@ -11,27 +11,32 @@ import RecentJobNumberTable from 'sections/dashboard/default/RecentJobNumberTabl
 import JobNumberPieChart from 'sections/apps/invoice/JobNumberPieChart';
 import { APIResponse } from 'types/response';
 import { getTotalJobNumber } from 'api/dashboard';
+import { getUsersWithJobNumber } from 'api/user';
+import { UserType } from 'types/pages/user';
 
 // ==============================|| DASHBOARD - DEFAULT ||============================== //
 
 export default function DashboardDefault() {
-
   const [totalJobNumber, setTotalJobNumber] = useState<any>();
+  const [usersWithJobNumber, setUsersWithJobNumber] = useState<UserType[]>([]);
   const intl = useIntl();
 
   useEffect(() => {
     fetchData();
   }, []);
 
-
   const fetchData = async () => {
     // API Extract
-    const totalJobNumberResponse: APIResponse = await getTotalJobNumber();
+    const [totalJobNumberResponse, usersWithJobNumberResponse]: APIResponse[] = await Promise.all([
+      getTotalJobNumber(),
+      getUsersWithJobNumber()
+    ]);
 
-    if (totalJobNumberResponse.status === 'success')
-      setTotalJobNumber(totalJobNumberResponse.data)
-    else
-      setTotalJobNumber({});
+    if (totalJobNumberResponse.status === 'success') setTotalJobNumber(totalJobNumberResponse.data);
+    else setTotalJobNumber({});
+
+    if (usersWithJobNumberResponse.status === 'success') setUsersWithJobNumber(usersWithJobNumberResponse.data);
+    else setUsersWithJobNumber([]);
   };
 
   return (
@@ -78,10 +83,10 @@ export default function DashboardDefault() {
       <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
       {/* row 2 */}
       <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <JobOverviewCreateChart />
+        <JobOverviewCreateChart userList={usersWithJobNumber} />
       </Grid>
       <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-        <JobNumberPieChart />
+        <JobNumberPieChart userList={usersWithJobNumber} />
       </Grid>
       {/* row 3 */}
       <Grid size={{ xs: 12, md: 12, lg: 12 }}>
@@ -94,7 +99,7 @@ export default function DashboardDefault() {
           <Grid />
         </Grid>
         <MainCard sx={{ mt: 2 }} content={false}>
-          <RecentJobNumberTable />
+          <RecentJobNumberTable userList={usersWithJobNumber} />
         </MainCard>
       </Grid>
       {/* <Grid size={{ xs: 12, md: 5, lg: 4 }}>
