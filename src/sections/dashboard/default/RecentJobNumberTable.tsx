@@ -23,7 +23,6 @@ import { getJobNumberRecent } from 'api/dashboard';
 // project imports
 import Dot from 'components/@extended/Dot';
 import { ColorProps } from 'types/extended';
-import { getUsersWithJobNumber } from 'api/user';
 import { UserType } from 'types/pages/user';
 
 // types
@@ -177,13 +176,16 @@ function OrderStatus({ status }: { status: string }) {
 
 // ==============================|| MAIN COMPONENT ||============================== //
 
-export default function OrderTable() {
+interface OrderTableProps {
+  userList?: UserType[];
+}
+
+export default function OrderTable({ userList = [] }: OrderTableProps) {
   const order: Order = 'asc';
   const orderBy: keyof Data = 'name';
 
   const [recentJobNumber, setRecentJobNumber] = useState<Data[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | number>('all');
-  const [userList, setUserList] = useState<UserType[]>([]);
   const intl = useIntl();
 
   useEffect(() => {
@@ -191,11 +193,6 @@ export default function OrderTable() {
   }, [selectedUser]);
 
   const fetchData = async () => {
-    const userListRes: APIResponse = await getUsersWithJobNumber();
-
-    if (userListRes.status === 'success') setUserList(userListRes.data);
-    else setUserList([]);
-
     const res: APIResponse = await getJobNumberRecent(selectedUser);
 
     if (res.status === 'success' && Array.isArray(res.data)) {
